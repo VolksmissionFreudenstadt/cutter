@@ -38,7 +38,6 @@ class Controller extends AbstractController {
      * @return void
      */
     function uploadAction() {
-        die('This is the upload action.');
     }
 
 

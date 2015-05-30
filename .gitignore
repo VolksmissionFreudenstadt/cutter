@@ -1,2 +1,5 @@
 /nbproject
 /vendor
+/Temp/Cache/*
+/Temp/Uploads/*
+/Temp/Processed/*

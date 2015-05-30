@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<!--
+CUTTER
+Versatile Image Cutter and Processor
+http://github.com/VolksmissionFreudenstadt/cutter
+
+Copyright (c) 2015 Volksmission Freudenstadt, http://www.volksmission-freudenstadt.de
+Author: Christoph Fischer, chris@toph.de
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html lang="de">
+    <head>
+        <title>CUTTER: Bilddatei hochladen ...</title>
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="Resources/Public/css/uploadfile.min.css" type="text/css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <script src="Resources/Public/js/jquery.uploadfile.min.js"></script>
+    </head>
+    <body>
+
+        <div class="container">
+
+            <div class="page-header">
+                <h1><span class="glyphicon glyphicon-open">&nbsp;</span>Bilddatei hochladen...</h1>
+            </div>
+
+            <h2>Quellenangaben</h2>
+
+            <form id="legal" role="form">
+                <div class="form-group">
+                    <label for="provider_user">Internetseite</label>
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span id="btnProviderSite"><?= $config['providers'][0]['name'] ?></span> <span class="caret"></span></button>
+                            <?= providerSelect() ?>
+                        </div>
+                        <input class="form-control" type="text" id="provider_user" placeholder="benutzername"/><br />
+                    </div>
+                    <div class="form-group">
+                        <label for="legal_freetext">oder Freitext:</label>
+                        <input class="form-control" type="text" id="legal_freetext" placeholder="Copyright" /><br />
+                    </div>
+                    <input id="provider_site" type="hidden" name="provider_site" value="<?= $config['providers'][0]['name'] ?>"/>
+            </form>
+
+            <h2>Bild</h2>
+
+
+            <ul id="myTab" class="nav nav-tabs" data-tabs="tabs">
+                <li class="active"><a href="#tabCrossload" data-toggle="tab">
+                        <span class="glyphicon glyphicon-cloud"></span>&nbsp;Aus der Cloud laden</a></li>
+                <li><a href="#tabUpload" data-toggle="tab">
+                        <span class="glyphicon glyphicon-open"></span>&nbsp;Upload von meinem Computer</a></li>
+            </ul>
+
+            <div id="myTabContent" class="tab-content">
+                <div class="tab-pane active" id="tabCrossload">
+                    <form id="crossloadForm" method="post" action="import-remote.php" role="form">
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-btn">
+                                    <button id="crossloadSubmit" class="btn btn-default" type="button">Laden</button>
+                                </span>
+                                <input class="form-control" type="text" id="url" placeholder="http://www.example.com/image1.html" /><br />
+                            </div>
+                        </div>
+                        <input id="crossloadStep" name="step" type="hidden" value="0" />
+                        <input id="crossloadLegal" name="step" type="hidden" value="" />
+                    </form>
+                </div>
+                <div class="tab-pane" id="tabUpload">
+                    <form id="fileupload" action="do-upload.php" method="POST" enctype="multipart/form-data" role="form">
+                        <p>
+                            Bitte lade hier das Bild hoch, das du im nächsten Schritt bearbeiten möchtest ...
+                        </p>
+
+                        <input id="origUpload" type="file" name="upload" accept="image/jpeg"/>
+                        <input id="origUploadButton" type="submit" name="submit" value="Upload starten" />
+                        <input type="hidden" name="MAX_FILE_SIZE" value="5000000000">
+                        <input id="legal" type="hidden" name="legal" value="">
+
+                    </form>
+                    <div id="fileuploader">Bild hochladen</div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <div id="eventsmessage"></div>
+
+        <script>
+            function getLegalText() {
+                if ($('#provider_user').val() !== '') {
+                    var legal = $('#provider_site').val() + ' / ' + $('#provider_user').val();
+                } else {
+                    var legal = $('#legal_freetext').val();
+                }
+                return legal;
+            }
+
+            $(document).ready(function () {
+
+                $("#fileuploader").uploadFile({
+                    url: 'do-upload.php',
+                    filename: 'upload',
+                    downloadStr: 'Hochladen',
+                    cancelStr: 'Abbrechen',
+                    abortStr: 'Abbrechen',
+                    doneStr: 'Fertig',
+                    dragDropStr: "<span><b>... oder eine Datei hierher ziehen.</b></span>",
+                    maxFileCount: 1,
+                    maxFileSize: 100 * 1024 * 1024,
+                    multiple: false,
+                    showProgress: true,
+                    onSubmit: function (files)
+                    {
+                        $('#legal').val(getLegalText());
+                        $("#eventsmessage").html($("#eventsmessage").html() + "<br/>Submitting:" + JSON.stringify(files));
+                    },
+                    onSuccess: function (files, data, xhr)
+                    {
+                        $("#eventsmessage").html($("#eventsmessage").html() + "<br/>Success for: " + data);
+                        window.location.href = 'index.php?image=' + data + '&legal=' + getLegalText();
+
+                    },
+                    afterUploadAll: function ()
+                    {
+                        $("#eventsmessage").html($("#eventsmessage").html() + "<br/>All files are uploaded");
+                        //$('#fileupload').submit();
+
+                    },
+                    onError: function (files, status, errMsg)
+                    {
+                        $("#eventsmessage").html($("#eventsmessage").html() + "<br/>Error for: " + JSON.stringify(files));
+                    }
+                });
+                $('#fileupload').hide();
+                //$('#origUploadButton').hide();
+
+
+                $('#crossloadSubmit').click(function () {
+                    //alert('Hi');
+                    window.location.href = 'import-remote.php?url=' + encodeURIComponent($('#url').val());
+                });
+
+                $('li.providerOption a').click(function () {
+                    var v = $(this).html();
+                    $('#btnProviderSite').html(v);
+                    $('#provider_site').val(v);
+                });
+
+                $('#myTab').tab();
+
+            });
+
+
+        </script>
+
+
+    </body>
+
+</html>

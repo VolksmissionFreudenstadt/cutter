@@ -33,9 +33,14 @@ class AbstractController {
     private $configurationManager = NULL;
     protected $defaultAction = '';
 
+    protected $viewPath = 'Views/';
+    protected $viewLoader = NULL;
+    protected $view = NULL;
+
     public function __construct() {
         $confManager = $this->getConfigurationManager();
         $this->conf = $confManager->getConfigurationSet('cutter');
+        
     }
 
     /**
@@ -55,7 +60,12 @@ class AbstractController {
         if (!method_exists($this, $actionMethod)) {
             throw new \Exception('Method "'.$requestedAction.'" not implemented in this controller.', 0x01);
         } else {
+            // get the view
+            $this->view = new \VMFDS\Cutter\Core\View($requestedAction);
+            // run the action method
             $this->$actionMethod();
+            // render the view
+            echo $this->view->render();
         }
     }
 
