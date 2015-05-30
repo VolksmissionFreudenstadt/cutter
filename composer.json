@@ -1,0 +1,10 @@
+{
+    "name": "vmfds/cutter",
+    "version": "2.0.0",
+    "repositories": [
+            {
+                "type": "vcs",
+                "url": "https://github.com/VolksmissionFreudenstadt/cutter"
+            }
+        ]    
+}
