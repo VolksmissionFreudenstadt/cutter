@@ -46,8 +46,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <label for="provider_user">Internetseite</label>
                     <div class="input-group">
                         <div class="input-group-btn">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span id="btnProviderSite"><?= $config['providers'][0]['name'] ?></span> <span class="caret"></span></button>
-                            <?= providerSelect() ?>
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span id="btnProviderSite">{{ providers.0 }}</span> <span class="caret"></span></button>
+                            <ul>
+                                {% for item in providers %}
+                                <li class="providerOption">
+                                    <a href="#">{{ item }}</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
                         </div>
                         <input class="form-control" type="text" id="provider_user" placeholder="benutzername"/><br />
                     </div>
@@ -55,7 +61,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         <label for="legal_freetext">oder Freitext:</label>
                         <input class="form-control" type="text" id="legal_freetext" placeholder="Copyright" /><br />
                     </div>
-                    <input id="provider_site" type="hidden" name="provider_site" value="<?= $config['providers'][0]['name'] ?>"/>
             </form>
 
             <h2>Bild</h2>
@@ -70,7 +75,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
             <div id="myTabContent" class="tab-content">
                 <div class="tab-pane active" id="tabCrossload">
-                    <form id="crossloadForm" method="post" action="import-remote.php" role="form">
+                    <form id="crossloadForm" method="post" action="/?action=debug" role="form">
                         <div class="form-group">
                             <div class="input-group">
                                 <span class="input-group-btn">
@@ -157,7 +162,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                 $('#crossloadSubmit').click(function () {
                     //alert('Hi');
-                    window.location.href = 'import-remote.php?url=' + encodeURIComponent($('#url').val());
+                    window.location.href = '?action=import&url=' + encodeURIComponent($('#url').val());
                 });
 
                 $('li.providerOption a').click(function () {

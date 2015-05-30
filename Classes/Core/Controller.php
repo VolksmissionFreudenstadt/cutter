@@ -38,6 +38,10 @@ class Controller extends AbstractController {
      * @return void
      */
     function uploadAction() {
+        // get list of possible providers
+        $providers = \VMFDS\Cutter\Core\ProviderFactory::getProviderNames();
+
+        $this->view->assign('providers', $providers);
     }
 
 
@@ -52,6 +56,25 @@ class Controller extends AbstractController {
         // redirect to upload, if we don't have a file yet
         if (!$session->hasArgument('workFile')) $this->redirectToAction ('upload');
         die('This is the index action.');
+    }
+
+    function debugAction() {
+        die ('<pre>'.print_r($_REQUEST, 1));
+    }
+
+
+    /**
+     * Import action
+     * @action import
+     * @return void
+     */
+    function importAction() {
+        $url = \VMFDS\Cutter\Utility\Request::GPVar('url');
+        $provider = \VMFDS\Cutter\Core\ProviderFactory::getHostHandler($url);
+
+        echo '<pre>'.print_r($_REQUEST, 1);
+        print_r($provider);
+        die();
     }
 
 
