@@ -32,7 +32,7 @@ function getLegalText() {
 $(document).ready(function () {
 
     $("#fileuploader").uploadFile({
-        url: '?action=upload',
+        url: '?action=receive',
         filename: 'upload',
         downloadStr: 'Hochladen',
         cancelStr: 'Abbrechen',

@@ -104,4 +104,13 @@ class Session
     {
         return $_SESSION[self::SESSION_KEY];
     }
+
+    /**
+     * Clear the session
+     * @return void
+     */
+    public function clear()
+    {
+        $_SESSION[self::SESSION_KEY] = array();
+    }
 }

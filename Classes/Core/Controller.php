@@ -41,6 +41,10 @@ class Controller extends AbstractController
     function uploadAction()
     {
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('uploadAction called');
+
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Clearing session content');
+        \VMFDS\Cutter\Core\Session::getInstance()->clear();
+
         // get list of possible providers
         $providers = \VMFDS\Cutter\Factories\ProviderFactory::getProviderNames();
         $this->view->assign('providers', $providers);
@@ -122,13 +126,15 @@ class Controller extends AbstractController
         }
         $filesArray = $request->getFilesArray();
         $fileName   = $filesArray['file']['name'];
-        if ($request->hasArgument('legal'))
-                $fileName .= '_'.str_replace(' / ', '_',
-                    $request->getArgument('legal'));
-        $fileName   = strtr($fileName,
+        $legal      = '';
+        if ($request->hasArgument('legal')) {
+            $legal = $request->getArgument('legal');
+            $fileName .= '_'.str_replace(' / ', '_', $legal);
+        }
+        $fileName = strtr($fileName,
             array(' ' => '_', 'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue',
             'Ä' => 'Ae', 'Ö' => 'Oe', 'Ü' => 'Ue', 'ß' => 'ss'));
-        $dest       = CUTTER_uploadPath.$fileName;
+        $dest     = CUTTER_uploadPath.$fileName;
         move_uploaded_file($filesArray['file']['tmp_name'], $dest);
 
         // save info in session
