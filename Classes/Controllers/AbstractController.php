@@ -43,6 +43,11 @@ class AbstractController
         $this->conf  = $confManager->getConfigurationSet('cutter');
     }
 
+    protected function initializeController()
+    {
+
+    }
+
     /**
      * Process action routing
      *
@@ -69,7 +74,8 @@ class AbstractController
             // get the view
             $this->view = new \VMFDS\Cutter\Core\View($requestedAction);
             $this->view->setViewPath(CUTTER_viewPath.$this->getName().'/');
-            // run the action method
+            // run the initialize and action methods
+            $this->initializeController();
             $this->$actionMethod();
             // render the view
             if ($this->showView) {

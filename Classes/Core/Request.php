@@ -113,10 +113,13 @@ class Request
      */
     public function parseUri()
     {
-        $pattern = 'controller|action';
-        $uri     = $_SERVER['REQUEST_URI'];
-        $uri     = str_replace(parse_url(CUTTER_baseUrl, PHP_URL_PATH), '', $uri);
-        $uri     = parse_url($uri, PHP_URL_PATH);
+        $pattern            = 'controller|action';
+        $uri                = $_SERVER['REQUEST_URI'];
+        $this->data['_ext'] = pathinfo($uri, PATHINFO_EXTENSION);
+        $uri                = str_replace('.'.$this->data['_ext'], '', $uri);
+        $uri                = str_replace(parse_url(CUTTER_baseUrl, PHP_URL_PATH),
+            '', $uri);
+        $uri                = parse_url($uri, PHP_URL_PATH);
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Parsing URI '.$uri);
         if ($uri != '') {
             $this->data['_raw'] = explode('/', $uri);

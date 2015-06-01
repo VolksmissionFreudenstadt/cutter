@@ -32,7 +32,7 @@ function getLegalText() {
 $(document).ready(function () {
 
     $("#fileuploader").uploadFile({
-        url: '?action=receive',
+        url: '{{ baseUrl }}acquisition/receive',
         filename: 'upload',
         downloadStr: 'Hochladen',
         cancelStr: 'Abbrechen',
@@ -71,7 +71,7 @@ $(document).ready(function () {
 
     $('#crossloadSubmit').click(function () {
         //alert('Hi');
-        window.location.href = '?action=import&url=' + encodeURIComponent($('#url').val());
+        window.location.href = '{{ baseUrl }}acquisition/import/?url=' + encodeURIComponent($('#url').val());
     });
 
     $('li.providerOption a').click(function () {
