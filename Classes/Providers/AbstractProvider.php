@@ -64,7 +64,7 @@ class AbstractProvider
     }
 
     /**
-     * Get this provider's kay (class without namespace and 'Provider')
+     * Get this provider's key (class without namespace and 'Provider')
      * @return \string
      */
     public function getKey()
