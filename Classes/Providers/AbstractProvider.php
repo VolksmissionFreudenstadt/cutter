@@ -23,7 +23,6 @@
 
 namespace VMFDS\Cutter\Providers;
 
-
 /**
  * Description of AbstractProvider
  *
@@ -32,27 +31,26 @@ namespace VMFDS\Cutter\Providers;
 class AbstractProvider
 {
     static protected $handledHosts = array();
-    protected $configuration = array();
-
+    protected $configuration       = array();
     protected $curl;
-    public $workFile = '';
-    public $legal = '';
-
+    public $workFile               = '';
+    public $legal                  = '';
 
     /**
      * Checks if this provider can handle urls from a specific host
      * @param \string $host Host
      * @return bool True, if provider can handle urls from this host
      */
-    static public function canHandleHost($host) {
+    static public function canHandleHost($host)
+    {
         return in_array($host, self::$handledHosts);
     }
-
 
     public function __construct()
     {
         $confManager = \VMFDS\Cutter\Core\ConfigurationManager::getInstance();
-        $this->setConfiguration($confManager->getConfigurationSet($this->getKey(), 'Providers'));
+        $this->setConfiguration($confManager->getConfigurationSet($this->getKey(),
+                'Providers'));
         $this->initCurl();
     }
 
@@ -60,7 +58,8 @@ class AbstractProvider
      * Set configuration array
      * @param array $configuration Configuration array
      */
-    public function setConfiguration($configuration) {
+    public function setConfiguration($configuration)
+    {
         $this->configuration = $configuration;
     }
 
@@ -68,14 +67,12 @@ class AbstractProvider
      * Get this provider's kay (class without namespace and 'Provider')
      * @return \string
      */
-    public function getKey() {
+    public function getKey()
+    {
         $class = get_class($this);
-        return str_replace('Provider', '', str_replace('VMFDS\\Cutter\\Providers\\', '', $class));
+        return str_replace('Provider', '',
+            str_replace('VMFDS\\Cutter\\Providers\\', '', $class));
     }
-
-
-
-
 
     /**
      * Initialize CURL for use with this object
@@ -158,7 +155,7 @@ class AbstractProvider
     protected function writeFile($src, $destination)
     {
         $rawFile = $this->getFile($src);
-        $fp = fopen($destination, 'w');
+        $fp      = fopen($destination, 'w');
         fwrite($fp, $rawFile);
         fclose($fp);
     }
@@ -233,12 +230,12 @@ class AbstractProvider
     protected function getForm($doc, $id)
     {
         $data = array();
-        $el = $doc->getElementById($id);
+        $el   = $doc->getElementById($id);
         if ($el->tagName != 'form') {
             $el = $el->getElementsByTagName('form')->item(0);
         }
         $data['action'] = $el->getAttribute('action');
-        $inputs = $el->getElementsByTagName('input');
+        $inputs         = $el->getElementsByTagName('input');
         foreach ($inputs as $input) {
             $key = $input->getAttribute('name');
             if ($key) {
@@ -275,6 +272,4 @@ class AbstractProvider
     {
         return '<pre>'.($title ? '<b>'.$title.':</b>' : '').print_r($s, true).'</pre>';
     }
-
-
 }

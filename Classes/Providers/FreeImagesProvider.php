@@ -34,14 +34,15 @@ class FreeImagesProvider extends AbstractProvider
         'freeimages.com',
         'sxc.hu',
         'www.sxc.hu'
-        );
+    );
 
     /**
      * Checks if this provider can handle urls from a specific host
      * @param \string $host Host
      * @return bool True, if provider can handle urls from this host
      */
-    static public function canHandleHost($host) {
+    static public function canHandleHost($host)
+    {
         return in_array($host, self::$handledHosts);
     }
 
@@ -49,17 +50,17 @@ class FreeImagesProvider extends AbstractProvider
      * Get the name for this provider
      * @return string Provider name
      */
-    static public function getName() {
+    static public function getName()
+    {
         return 'freeimages';
     }
 
     public function __construct()
     {
         parent::__construct();
-        $this->configuration['baseUrl'] = 'http://www.freeimages.com';
+        $this->configuration['baseUrl']  = 'http://www.freeimages.com';
         $this->configuration['loginUrl'] = 'http://www.freeimages.com/index.phtml';
     }
-
 
     /**
      * Retrieve an image from a specific url
@@ -79,13 +80,13 @@ class FreeImagesProvider extends AbstractProvider
         $src = $this->getSourceUrl($doc);
 
         // extract info from document title
-        $title = $this->getDocTitle($doc);
+        $title   = $this->getDocTitle($doc);
         $markers = $this->regexMarkers('/(.*)\(Stock Photo By (.*)\) \[ID: (.*)\]/is',
             $title, array(1 => 'title', 2 => 'user', 3 => 'id'));
 
         $this->workFile = $this->replaceMarkers($this->configuration['fileNamePattern'],
             $markers);
-        $this->legal = $this->replaceMarkers($this->configuration['legalPattern'],
+        $this->legal    = $this->replaceMarkers($this->configuration['legalPattern'],
             $markers, FALSE);
 
         $this->workFile = preg_replace('/\W+/', '_', $this->workFile).'.'.pathinfo($src,
@@ -136,10 +137,10 @@ class FreeImagesProvider extends AbstractProvider
     protected function getTitleAndInfo($src, $doc)
     {
         if ($this->configuration['nameByTitle']) {
-            $searchArray = array();
+            $searchArray  = array();
             $replaceArray = array();
             foreach ($marker as $needle => $val) {
-                $searchArray[] = '###'.strtoupper($needle).'###';
+                $searchArray[]  = '###'.strtoupper($needle).'###';
                 $replaceArray[] = str_replace(' ', '-',
                     str_replace('.', '', trim($val)));
             }
@@ -151,5 +152,4 @@ class FreeImagesProvider extends AbstractProvider
         }
         $this->workFile = pathinfo($src, PATHINFO_FILENAME);
     }
-
 }

@@ -31,21 +31,22 @@ namespace VMFDS\Cutter\Factories;
 class AbstractFactory
 {
 
-    static public function getAllClasses($type) {
-        $type = ucfirst($type);
-        $typeAbstract = 'Abstract'.$type;
-        $typeMulti = $type.'s';
+    static public function getAllClasses($type)
+    {
+        $type          = ucfirst($type);
+        $typeAbstract  = 'Abstract'.$type;
+        $typeMulti     = $type.'s';
         $typeNamespace = '\\VMFDS\\Cutter\\'.$typeMulti;
-        $typePath = CUTTER_basePath.'Classes/'.$typeMulti.'/';
+        $typePath      = CUTTER_basePath.'Classes/'.$typeMulti.'/';
 
         $classes = array();
         // find all matching classes
-        $handle = opendir($typePath);
-        while ($file = readdir($handle)) {
-            if (substr($file, -(strlen($type)+4)) == $type.'.php') {
+        $handle  = opendir($typePath);
+        while ($file    = readdir($handle)) {
+            if (substr($file, -(strlen($type) + 4)) == $type.'.php') {
                 if ($file != $typeAbstract.'.php') {
-                    $thisType = substr($file, 0, -(strlen($type)+4));
-                    $thisClass = $typeNamespace.'\\'.$thisType.$type;
+                    $thisType           = substr($file, 0, -(strlen($type) + 4));
+                    $thisClass          = $typeNamespace.'\\'.$thisType.$type;
                     $classes[$thisType] = $thisClass;
                 }
             }
@@ -53,5 +54,4 @@ class AbstractFactory
         closedir($handle);
         return $classes;
     }
-    
 }
