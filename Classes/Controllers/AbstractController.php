@@ -1,6 +1,6 @@
 <?php
 
-namespace VMFDS\Cutter\Core;
+namespace VMFDS\Cutter\Controllers;
 
 /*
  * CUTTER
@@ -51,14 +51,15 @@ class AbstractController
      */
     public function dispatch()
     {
-        $request         = \VMFDS\Cutter\Core\Request::getInstance();
-        $requestedAction = $request->getArgument('action');
-        if ($requestedAction == '') {
-            $requestedAction = $this->defaultAction ? $this->defaultAction : 'default';
-            $this->redirectToAction($requestedAction);
-            return;
+        $request = \VMFDS\Cutter\Core\Request::getInstance();
+
+        if (!$request->hasArgument('action')) {
+            // redirect to default action
+            $defaultAction = $this->defaultAction ? $this->defaultAction : 'default';
+            $this->redirectToAction($defaultAction);
         }
-        $actionMethod = $requestedAction.'Action';
+        $requestedAction = $request->getArgument('action');
+        $actionMethod    = $requestedAction.'Action';
         if (!method_exists($this, $actionMethod)) {
             \VMFDS\Cutter\Core\Logger::getLogger()->addEmergency(
                 'Method "'.$requestedAction.'" not implemented in this controller.');
@@ -67,6 +68,7 @@ class AbstractController
         } else {
             // get the view
             $this->view = new \VMFDS\Cutter\Core\View($requestedAction);
+            $this->view->setViewPath(CUTTER_viewPath.$this->getName().'/');
             // run the action method
             $this->$actionMethod();
             // render the view
@@ -89,23 +91,14 @@ class AbstractController
     }
 
     /**
-     * Redirect to another action
-     * @param \string $targetUrl Url
-     * @param \int $redirectMethod Method of redirecting
-     * @param \int $delay Delay in ms (only with javascript redirect)
+     * Get this controllers's name (class without namespace and 'Provider')
+     * @return \string
      */
-    protected function redirectToUrl($targetUrl,
-                                     $redirectMethod = self::REDIRECT_HEADER,
-                                     $delay = 0)
+    public function getName()
     {
-        switch ($redirectMethod) {
-            case self::REDIRECT_HEADER:
-                Header('Location: '.$targetUrl);
-                break;
-            case self::REDIRECT_JAVASCRIPT:
-                echo '<script type="text/javascript"> setTimeout(function(){ window.location.href=\''.$targetUrl.'\' }, '.$delay.');</script>';
-                break;
-        }
+        $class = get_class($this);
+        return str_replace('Controller', '',
+            str_replace('VMFDS\\Cutter\\Controllers\\', '', $class));
     }
 
     /**
@@ -118,7 +111,8 @@ class AbstractController
                                         $redirectMethod = self::REDIRECT_HEADER,
                                         $delay = 0)
     {
-        $this->redirectToUrl(CUTTER_baseUrl.'?action='.$action, $redirectMethod,
+        \VMFDS\Cutter\Core\Router::getInstance()->redirect(
+            strtolower($this->getName()), $action, null, null, $redirectMethod,
             $delay);
     }
 

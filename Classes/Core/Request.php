@@ -31,7 +31,7 @@ class Request
 
     /**
      * Get an instance of the request object
-     * @return \VMFDS\Cutter\Utility\Request Instance of session object
+     * @return \VMFDS\Cutter\Core\Request Instance of session object
      */
     static public function getInstance()
     {
@@ -68,7 +68,7 @@ class Request
      */
     public function hasArgument($argument)
     {
-        return isset($this->data[$argument]);
+        return (isset($this->data[$argument]) && ($this->data[$argument] != ''));
     }
 
     /**
@@ -106,5 +106,43 @@ class Request
     public function getFilesArray()
     {
         return $_FILES;
+    }
+
+    /**
+     * Parse request data from nice URL
+     */
+    public function parseUri()
+    {
+        $pattern = 'controller|action';
+        $uri     = $_SERVER['REQUEST_URI'];
+        $uri     = str_replace(parse_url(CUTTER_baseUrl, PHP_URL_PATH), '', $uri);
+        $uri     = parse_url($uri, PHP_URL_PATH);
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Parsing URI '.$uri);
+        if ($uri != '') {
+            $this->data['_raw'] = explode('/', $uri);
+        } else {
+            $this->data['_raw'] = array();
+        }
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('URI parsed',
+            $this->data);
+    }
+
+    /**
+     * Get named parameters from request according to a uri pattern
+     * @param array $pattern Array with names of uri sections
+     */
+    public function applyUriPattern($pattern)
+    {
+        $uriItems = $this->data['_raw'];
+        foreach ($pattern as $key) {
+            if (isset($uriItems[0])) {
+                $this->data[$key] = $uriItems[0];
+                unset($uriItems[0]);
+            } else {
+                $this->data[$key] = '';
+            }
+            $uriItems = array_values($uriItems);
+        }
+        $this->data['_raw'] = $uriItems;
     }
 }

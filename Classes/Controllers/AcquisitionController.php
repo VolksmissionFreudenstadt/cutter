@@ -1,6 +1,6 @@
 <?php
 
-namespace VMFDS\Cutter\Core;
+namespace VMFDS\Cutter\Controllers;
 
 /*
  * CUTTER
@@ -24,21 +24,21 @@ namespace VMFDS\Cutter\Core;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Controller extends AbstractController
+class AcquisitionController extends AbstractController
 {
 
     function __construct()
     {
         parent::__construct();
-        $this->setDefaultAction('index');
+        $this->setDefaultAction('form');
     }
 
     /**
-     * Upload action
-     * @action upload
+     * Display the upload form
+     * @action form
      * @return void
      */
-    function uploadAction()
+    function formAction()
     {
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('uploadAction called');
 
@@ -63,11 +63,12 @@ class Controller extends AbstractController
         // redirect to upload, if we don't have a file yet
         if (!$session->hasArgument('workFile')) {
             \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('No workFile in session, redirecting to upload');
-            $this->redirectToAction('upload');
+            $this->redirectToAction('form');
         }
-        echo '<pre>';
-        print_r($_SESSION);
-        die('This is the index action.');
+
+        $this->view->assign('image',
+            CUTTER_baseUrl.'Temp/Uploads/'.$session->getArgument('workFile'));
+        $this->view->assign('legal', $session->getArgument('legal'));
     }
 
     function debugAction()

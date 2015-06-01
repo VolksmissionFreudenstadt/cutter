@@ -1,0 +1,109 @@
+<html lang="de">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+        <title>CUTTER</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="css/jquery.Jcrop.css" type="text/css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <script src="js/jquery.Jcrop.js"></script>
+        <script src="js/holder/holder.js"></script>
+        <script src="js/cutter-ui.js"></script>
+
+    </head>
+    <body>
+
+        <script type="text/javascript">
+            var steps = <?= json_encode($config['targets']) ?>;
+            var icons = <?= json_encode($glyphicon) ?>;
+            $(document).ready(function () {
+                loadStep(<?= $step ?>);
+            });
+        </script>
+
+        <div id="options" style="display: none">
+            <input type="hidden" id="option-w" name="w" />
+            <input type="hidden" id="option-h" name="h" />
+            <input type="hidden" id="option-step" name="step" />
+            <input type="hidden" id="option-title" name="title" />
+            <input type="hidden" id="option-mode" name="mode" />
+            <input type="hidden" id="option-legal" name="legal" />
+        </div>
+
+        <div class="container">
+            <div class="col-md-4">
+                <div class="list-group">
+
+                    <?php
+                    // step selectors
+                    $stepCtr = 0;
+                    foreach ($config['targets'] as $stepIdx => $t) {
+
+                        $t = setDefaults($t, $config,
+                            array('mode ', 'destination',
+                            'jpeg_quality', 'legal'));
+
+                        echo '<a href = "#" class = "list-group-item stepSelector '.(($stepIdx
+                        == $step) ? 'active' : '').'" '
+                        .'data-step = "'.$stepIdx.'" '
+                        .'data-w = "'.$t['w'].'" '
+                        .'data-h = "'.$t['h'].'" '
+                        .'data-title = "'.$t['title'].'" '
+                        .'data-mode = "'.$t['mode'].'" '
+                        .'data-legal = "'.$t['legal'].'" '
+                        .'>';
+                        echo $glyphicon[$t['mode']].$t['title']
+                        .'<span class = "badge">'.$t['w'].'x'.$t['h'].'</span>';
+                        echo '</a>'."\r\n";
+                    }
+                    $stepCtr ++;
+                    ?>
+                </div>
+            </div>
+
+
+            <div class="col-md-8">
+
+                <div class="page-header">
+                    <h1 id="stepTitle"><?= $stepTitle ?></h1>
+                    <span id="stepIcon"></span><span id="measurements"></span>
+                    <span id="customAR"><input type="text" size="4" id="myW" name="myW">x<input type="text" size="4" id="myH" name="myH"></span>
+                    &nbsp;
+                    <button id="btnCut" type="button" class="btn btn-success">Bild zuschneiden</button>
+                    <button id="btnAbort" type="button" class="btn btn-danger">Zurück zum Upload</button>
+                </div>
+
+                <!-- This is the image we're attaching Jcrop to -->
+                <img src = "{{ image }}" id = "cropbox" />
+
+                <!--This is the form that our event handler fills -->
+                <form action = "cut.php" method = "post" onsubmit = "return checkCoords();">
+                    <input type = "hidden" id = "x" name = "x" />
+                    <input type = "hidden" id = "y" name = "y" />
+                    <input type = "hidden" id = "w" name = "w" />
+                    <input type = "hidden" id = "h" name = "h" />
+                    <input type = "hidden" id = "customARW" name = "customARW" />
+                    <input type = "hidden" id = "customARH" name = "customARH" />
+                    <input type = "hidden" id = "step" name = "step" value = "<?= $step ?>" />
+                    <input type = "hidden" id = "image" name = "image" value = "<?= $image ?>" /><br />
+                    <div id = "mode-event">
+                        Dieses Bild folgender Veranstaltung zuordnen: <br />
+                        <span id="eventSelect"></span>
+                        <br />
+                    </div>
+                    <div id = "mode-sermon">
+                        Dieses Bild folgender Predigt zuordnen: <br />
+                        <span id="sermonSelect"></span>
+                        <br />
+                    </div>
+                    <label for="legal">Quellenangaben zum Bild:</label><input type="text" id="legal" name="legal" value="{{ legal }}" /><br />
+                </form>
+            </div>
+        </div>
+    </body>
+
+</html>

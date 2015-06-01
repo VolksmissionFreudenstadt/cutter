@@ -27,7 +27,7 @@ namespace VMFDS\Cutter\Core;
 class View
 {
     private $viewFile       = '';
-    private $viewPath       = 'Resources/Private/Views/';
+    private $viewPath       = CUTTER_viewPath;
     private $loader         = null;
     private $renderer       = null;
     private $arguments      = array();
@@ -70,7 +70,7 @@ class View
             if (!CUTTER_debug) {
                 $cacheConfig = array('cache' => CUTTER_basePath.'Temp/Cache');
             }
-            $this->loader   = new \Twig_Loader_Filesystem(CUTTER_basePath.$this->viewPath);
+            $this->loader   = new \Twig_Loader_Filesystem($this->viewPath);
             $this->renderer = new \Twig_Environment($this->loader, $cacheConfig);
             $this->rendered = true;
             return $this->renderer->render($this->viewFile, $this->arguments);

@@ -27,9 +27,11 @@ require_once('vendor/autoload.php');
 define('CUTTER_debug', true);
 define('CUTTER_basePath', __DIR__.'/');
 define('CUTTER_uploadPath', CUTTER_basePath.'Temp/Uploads/');
+define('CUTTER_viewPath', CUTTER_basePath.'Resources/Private/Views/');
 define('CUTTER_baseUrl',
     (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off') ? 'https' : 'http')
-    .'://'.$_SERVER['SERVER_NAME'].dirname($_SERVER["REQUEST_URI"].'?').'/');
+    .'://'.$_SERVER['SERVER_NAME'].dirname(parse_url($_SERVER['PHP_SELF'],
+            PHP_URL_PATH)).'/');
 
 // error handling stuff:
 if (CUTTER_debug) {
@@ -42,7 +44,7 @@ if (CUTTER_debug) {
 // start session handling
 \VMFDS\Cutter\Core\Session::initialize();
 
-// get a controller and run it
-$controller = new VMFDS\Cutter\Core\Controller();
-$controller->dispatch();
-
+// get a router and process request
+$router = \VMFDS\Cutter\Core\Router::getInstance();
+$router->setDefaultController('acquisition');
+$router->dispatch();
