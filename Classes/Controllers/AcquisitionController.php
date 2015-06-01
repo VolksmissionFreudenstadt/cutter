@@ -51,33 +51,6 @@ class AcquisitionController extends AbstractController
     }
 
     /**
-     * Index action
-     * @action index
-     * @return void
-     */
-    function indexAction()
-    {
-        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('indexAction called');
-        $session = \VMFDS\Cutter\Core\Session::getInstance();
-
-        // redirect to upload, if we don't have a file yet
-        if (!$session->hasArgument('workFile')) {
-            \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('No workFile in session, redirecting to upload');
-            $this->redirectToAction('form');
-        }
-
-        $this->view->assign('image',
-            CUTTER_baseUrl.'Temp/Uploads/'.$session->getArgument('workFile'));
-        $this->view->assign('legal', $session->getArgument('legal'));
-    }
-
-    function debugAction()
-    {
-        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('debugAction called');
-        die('<pre>'.print_r($_REQUEST, 1));
-    }
-
-    /**
      * Import action
      * @action import
      * @return void
