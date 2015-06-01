@@ -69,7 +69,7 @@ class AbstractController
             $this->$actionMethod();
             // render the view
             if ($this->showView) {
-                echo $this->renderView();
+                $this->renderView();
             }
         }
     }

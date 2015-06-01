@@ -42,7 +42,6 @@ class Controller extends AbstractController
     {
         // get list of possible providers
         $providers = \VMFDS\Cutter\Factories\ProviderFactory::getProviderNames();
-
         $this->view->assign('providers', $providers);
     }
 

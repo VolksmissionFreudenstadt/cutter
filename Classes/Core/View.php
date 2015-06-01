@@ -26,11 +26,13 @@ namespace VMFDS\Cutter\Core;
 
 class View
 {
-    private $viewFile  = '';
-    private $viewPath  = 'Resources/Private/Views/';
-    private $loader    = null;
-    private $renderer  = null;
-    private $arguments = array();
+    private $viewFile       = '';
+    private $viewPath       = 'Resources/Private/Views/';
+    private $loader         = null;
+    private $renderer       = null;
+    private $arguments      = array();
+    private $renderMultiple = false;
+    private $rendered       = false;
 
     public function __construct($actionName)
     {
@@ -63,12 +65,15 @@ class View
      */
     public function render()
     {
-        $cacheConfig = array();
-        if (!CUTTER_debug) {
-            $cacheConfig = array('cache' => CUTTER_basePath.'Temp/Cache');
+        if (!$this->rendered || $this->renderMultiple) {
+            $cacheConfig = array();
+            if (!CUTTER_debug) {
+                $cacheConfig = array('cache' => CUTTER_basePath.'Temp/Cache');
+            }
+            $this->loader   = new \Twig_Loader_Filesystem(CUTTER_basePath.$this->viewPath);
+            $this->renderer = new \Twig_Environment($this->loader, $cacheConfig);
+            $this->rendered = true;
+            return $this->renderer->render($this->viewFile, $this->arguments);
         }
-        $this->loader   = new \Twig_Loader_Filesystem(CUTTER_basePath.$this->viewPath);
-        $this->renderer = new \Twig_Environment($this->loader, $cacheConfig);
-        return $this->renderer->render($this->viewFile, $this->arguments);
     }
 }
