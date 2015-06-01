@@ -73,6 +73,7 @@ class AbstractController
             $this->$actionMethod();
             // render the view
             if ($this->showView) {
+                $this->view->sendContentTypeHeader();
                 $this->renderView();
             }
         }

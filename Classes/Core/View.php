@@ -34,6 +34,7 @@ class View
     private $arguments      = array();
     private $renderMultiple = false;
     private $rendered       = false;
+    private $contentType    = 'text/html';
 
     public function __construct($actionName)
     {
@@ -85,8 +86,34 @@ class View
      * Set the file extension for the view template (normally html)
      * @param \string $viewExtension file extension
      */
-    function setViewExtension($viewExtension)
+    public function setViewExtension($viewExtension)
     {
         $this->viewExtension = $viewExtension;
+    }
+
+    /**
+     * Get this view's content type
+     * @return \string content type
+     */
+    public function getContentType()
+    {
+        return $this->contentType;
+    }
+
+    /**
+     * Set this view's content type
+     * @param \string $contentType Content type
+     */
+    public function setContentType($contentType)
+    {
+        $this->contentType = $contentType;
+    }
+
+    /**
+     * Send content type header
+     */
+    public function sendContentTypeHeader()
+    {
+        Header('Content-Type: '.$this->contentType);
     }
 }
