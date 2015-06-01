@@ -2,7 +2,7 @@
 
 namespace VMFDS\Cutter\Core;
 
-/* 
+/*
  * CUTTER
  * Versatile Image Cutter and Processor
  * http://github.com/VolksmissionFreudenstadt/cutter
@@ -24,23 +24,23 @@ namespace VMFDS\Cutter\Core;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class AbstractController {
-
-    const REDIRECT_HEADER = 0x01;
+class AbstractController
+{
+    const REDIRECT_HEADER     = 0x01;
     const REDIRECT_JAVASCRIPT = 0x02;
 
-    private $conf = array();
+    private $conf                 = array();
     private $configurationManager = NULL;
-    protected $defaultAction = '';
+    protected $defaultAction      = '';
+    protected $viewPath           = 'Views/';
+    protected $viewLoader         = NULL;
+    protected $view               = NULL;
+    protected $showView           = TRUE;
 
-    protected $viewPath = 'Views/';
-    protected $viewLoader = NULL;
-    protected $view = NULL;
-
-    public function __construct() {
+    public function __construct()
+    {
         $confManager = $this->getConfigurationManager();
-        $this->conf = $confManager->getConfigurationSet('cutter');
-        
+        $this->conf  = $confManager->getConfigurationSet('cutter');
     }
 
     /**
@@ -49,8 +49,10 @@ class AbstractController {
      * @return void
      * @throws \Exception
      */
-    public function dispatch() {
-        $requestedAction = \VMFDS\Cutter\Utility\Request::GPVar('action');
+    public function dispatch()
+    {
+        $request         = \VMFDS\Cutter\Core\Request::getInstance();
+        $requestedAction = $request->getArgument('action');
         if ($requestedAction == '') {
             $requestedAction = $this->defaultAction ? $this->defaultAction : 'default';
             $this->redirectToAction($requestedAction);
@@ -58,14 +60,17 @@ class AbstractController {
         }
         $actionMethod = $requestedAction.'Action';
         if (!method_exists($this, $actionMethod)) {
-            throw new \Exception('Method "'.$requestedAction.'" not implemented in this controller.', 0x01);
+            throw new \Exception('Method "'.$requestedAction.'" not implemented in this controller.',
+            0x01);
         } else {
             // get the view
             $this->view = new \VMFDS\Cutter\Core\View($requestedAction);
             // run the action method
             $this->$actionMethod();
             // render the view
-            echo $this->view->render();
+            if ($this->showView) {
+                echo $this->renderView();
+            }
         }
     }
 
@@ -73,20 +78,24 @@ class AbstractController {
      * Get an instance of the configuration manager
      * @return \VMFDS\Cutter\Core\ConfigurationManager Configuration manager object
      */
-    protected function getConfigurationManager() {
+    protected function getConfigurationManager()
+    {
         if (is_null($this->configurationManager)) {
             $this->configurationManager = \VMFDS\Cutter\Core\ConfigurationManager::getInstance();
         }
         return $this->configurationManager;
     }
-    
+
     /**
      * Redirect to another action
      * @param \string $targetUrl Url
      * @param \int $redirectMethod Method of redirecting
      * @param \int $delay Delay in ms (only with javascript redirect)
      */
-    protected function redirectToUrl($targetUrl, $redirectMethod = self::REDIRECT_HEADER, $delay = 0) {
+    protected function redirectToUrl($targetUrl,
+                                     $redirectMethod = self::REDIRECT_HEADER,
+                                     $delay = 0)
+    {
         switch ($redirectMethod) {
             case self::REDIRECT_HEADER:
                 Header('Location: '.$targetUrl);
@@ -103,8 +112,12 @@ class AbstractController {
      * @param \int $redirectMethod Method of redirecting
      * @param \int $delay Delay in ms (only with javascript redirect)
      */
-    protected function redirectToAction($action, $redirectMethod = self::REDIRECT_HEADER, $delay = 0) {
-        $this->redirectToUrl(CUTTER_baseUrl.'?action='.$action, $redirectMethod, $delay);
+    protected function redirectToAction($action,
+                                        $redirectMethod = self::REDIRECT_HEADER,
+                                        $delay = 0)
+    {
+        $this->redirectToUrl(CUTTER_baseUrl.'?action='.$action, $redirectMethod,
+            $delay);
     }
 
     /**
@@ -126,5 +139,27 @@ class AbstractController {
         $this->defaultAction = $defaultAction;
     }
 
+    /**
+     * Switch off view handling
+     * @return void
+     */
+    public function dontShowView()
+    {
+        $this->showView = false;
+    }
 
+    /**
+     * Render the view now
+     * @param bool $show Output the view right away
+     */
+    public function renderView($show = true)
+    {
+        $rendered = $this->view->render();
+        if ($show) {
+            echo $rendered;
+        }
+        // prevent showing twice:
+        $this->dontShowView();
+        return $rendered;
+    }
 }

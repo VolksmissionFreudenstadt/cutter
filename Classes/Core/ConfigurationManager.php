@@ -47,11 +47,13 @@ class ConfigurationManager {
     /**
      * Return a specific configuration set
      * @param \string $setTitle Key for the configuration set
+     * @param \strung $folderTitle Subfolder for configuration
      * @return array Configuration set
      */
-    public function getConfigurationSet($setTitle) {
+    public function getConfigurationSet($setTitle, $folderTitle = '') {
+        $folderTitle = $folderTitle ? ucfirst($folderTitle).'/' : '';
         if (!isset($this->conf[$setTitle])) {
-            $this->conf[$setTitle] = yaml_parse_file(CUTTER_basePath.'/Configuration/'.ucfirst($setTitle).'.yaml');
+            $this->conf[$setTitle] = yaml_parse_file(CUTTER_basePath.'/Configuration/'.$folderTitle.ucfirst($setTitle).'.yaml');
         }
         return $this->conf[$setTitle];
     }

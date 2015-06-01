@@ -89,7 +89,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </form>
                 </div>
                 <div class="tab-pane" id="tabUpload">
-                    <form id="fileupload" action="do-upload.php" method="POST" enctype="multipart/form-data" role="form">
+                    <form id="fileupload" action="?action=uploaded" method="POST" enctype="multipart/form-data" role="form">
                         <p>
                             Bitte lade hier das Bild hoch, das du im nächsten Schritt bearbeiten möchtest ...
                         </p>
@@ -110,74 +110,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         <div id="eventsmessage"></div>
 
-        <script>
-            function getLegalText() {
-                if ($('#provider_user').val() !== '') {
-                    var legal = $('#provider_site').val() + ' / ' + $('#provider_user').val();
-                } else {
-                    var legal = $('#legal_freetext').val();
-                }
-                return legal;
-            }
-
-            $(document).ready(function () {
-
-                $("#fileuploader").uploadFile({
-                    url: 'do-upload.php',
-                    filename: 'upload',
-                    downloadStr: 'Hochladen',
-                    cancelStr: 'Abbrechen',
-                    abortStr: 'Abbrechen',
-                    doneStr: 'Fertig',
-                    dragDropStr: "<span><b>... oder eine Datei hierher ziehen.</b></span>",
-                    maxFileCount: 1,
-                    maxFileSize: 100 * 1024 * 1024,
-                    multiple: false,
-                    showProgress: true,
-                    onSubmit: function (files)
-                    {
-                        $('#legal').val(getLegalText());
-                        $("#eventsmessage").html($("#eventsmessage").html() + "<br/>Submitting:" + JSON.stringify(files));
-                    },
-                    onSuccess: function (files, data, xhr)
-                    {
-                        $("#eventsmessage").html($("#eventsmessage").html() + "<br/>Success for: " + data);
-                        window.location.href = 'index.php?image=' + data + '&legal=' + getLegalText();
-
-                    },
-                    afterUploadAll: function ()
-                    {
-                        $("#eventsmessage").html($("#eventsmessage").html() + "<br/>All files are uploaded");
-                        //$('#fileupload').submit();
-
-                    },
-                    onError: function (files, status, errMsg)
-                    {
-                        $("#eventsmessage").html($("#eventsmessage").html() + "<br/>Error for: " + JSON.stringify(files));
-                    }
-                });
-                $('#fileupload').hide();
-                //$('#origUploadButton').hide();
-
-
-                $('#crossloadSubmit').click(function () {
-                    //alert('Hi');
-                    window.location.href = '?action=import&url=' + encodeURIComponent($('#url').val());
-                });
-
-                $('li.providerOption a').click(function () {
-                    var v = $(this).html();
-                    $('#btnProviderSite').html(v);
-                    $('#provider_site').val(v);
-                });
-
-                $('#myTab').tab();
-
-            });
-
-
-        </script>
-
+        <script src="Resources/Public/js/uploadUi.js"></script>
 
     </body>
 

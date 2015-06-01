@@ -27,6 +27,8 @@ namespace VMFDS\Cutter\Core;
 // just a wrapper around PHP's session handling
 class Session {
 
+    const SESSION_KEY = 'VMFDS\\Cutter';
+
     static private $instance = NULL;
     static private $started = false;
     protected $conf = array();
@@ -54,7 +56,7 @@ class Session {
      * @return void
      */
     static public function initialize() {
-        session_start();
+        if (session_status() != PHP_SESSION_ACTIVE) session_start();
     }
 
     /**
@@ -63,7 +65,7 @@ class Session {
      * @return \bool True if argument exists
      */
     public function hasArgument($argument) {
-        return isset($_SESSION[$argument]);
+        return isset($_SESSION[self::SESSION_KEY][$argument]);
     }
 
     /**
@@ -72,7 +74,7 @@ class Session {
      * @param variant Argument value or FALSE if argument not present
      */
     public function getArgument($argument) {
-        return ($this->hasArgument($argument) ? $_SESSION[$argument] : false);
+        return ($this->hasArgument($argument) ? $_SESSION[self::SESSION_KEY][$argument] : false);
     }
 
     /**
@@ -82,7 +84,7 @@ class Session {
      * @return void
      */
     public function setArgument($argument, $value) {
-        $_SESSION[$argument] = $value;
+        $_SESSION[self::SESSION_KEY][$argument] = $value;
     }
 
     /**
@@ -90,6 +92,6 @@ class Session {
      * @return array Arguments
      */
     public function getArguments() {
-        return $_SESSION;
+        return $_SESSION[self::SESSION_KEY];
     }
 }

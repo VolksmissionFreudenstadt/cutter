@@ -2,7 +2,7 @@
 
 namespace VMFDS\Cutter\Core;
 
-/* 
+/*
  * CUTTER
  * Versatile Image Cutter and Processor
  * http://github.com/VolksmissionFreudenstadt/cutter
@@ -24,7 +24,8 @@ namespace VMFDS\Cutter\Core;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Controller extends AbstractController {
+class Controller extends AbstractController
+{
 
     function __construct()
     {
@@ -37,45 +38,93 @@ class Controller extends AbstractController {
      * @action upload
      * @return void
      */
-    function uploadAction() {
+    function uploadAction()
+    {
         // get list of possible providers
-        $providers = \VMFDS\Cutter\Core\ProviderFactory::getProviderNames();
+        $providers = \VMFDS\Cutter\Factories\ProviderFactory::getProviderNames();
 
         $this->view->assign('providers', $providers);
     }
-
 
     /**
      * Index action
      * @action index
      * @return void
      */
-    function indexAction() {
+    function indexAction()
+    {
         $session = \VMFDS\Cutter\Core\Session::getInstance();
 
         // redirect to upload, if we don't have a file yet
-        if (!$session->hasArgument('workFile')) $this->redirectToAction ('upload');
+        if (!$session->hasArgument('workFile')) {
+            $this->redirectToAction('upload');
+        }
+        echo '<pre>';
+        print_r($_SESSION);
         die('This is the index action.');
     }
 
-    function debugAction() {
-        die ('<pre>'.print_r($_REQUEST, 1));
+    function debugAction()
+    {
+        die('<pre>'.print_r($_REQUEST, 1));
     }
-
 
     /**
      * Import action
      * @action import
      * @return void
      */
-    function importAction() {
-        $url = \VMFDS\Cutter\Utility\Request::GPVar('url');
-        $provider = \VMFDS\Cutter\Core\ProviderFactory::getHostHandler($url);
+    function importAction()
+    {
+        $request = \VMFDS\Cutter\Core\Request::getInstance();
+        if (!$request->hasArgument('url')) {
+            $this->redirectToAction('upload');
+        }
+        $url      = $request->getArgument('url');
+        $provider = \VMFDS\Cutter\Factories\ProviderFactory::getHostHandler($url);
 
-        echo '<pre>'.print_r($_REQUEST, 1);
+        // render the view prematurely (waiting ...)
+        $this->renderView();
+
+        $provider->retrieveImage($url);
         print_r($provider);
-        die();
+
+        // save data in session and redirect to index
+        $session = \VMFDS\Cutter\Core\Session::getInstance();
+        $session->setArgument('workFile', $provider->workFile);
+        $session->setArgument('legal', $provider->legal);
+
+        $this->redirectToAction('index', self::REDIRECT_JAVASCRIPT, 3000);
     }
 
+    /**
+     * Receive action
+     * Gets called to process an uploaded file
+     * @action receive
+     */
+    function receiveAction()
+    {
+        $request = \VMFDS\Cutter\Core\Request::getInstance();
+        if (!$request->hasFilesArray()) {
+            $this->redirectToAction('upload');
+        }
+        $filesArray = $request->getFilesArray();
+        $fileName   = $filesArray['file']['name'];
+        if ($request->hasArgument('legal'))
+                $fileName .= '_'.str_replace(' / ', '_',
+                    $request->getArgument('legal'));
+        $fileName   = strtr($fileName,
+            array(' ' => '_', 'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue',
+            'Ä' => 'Ae', 'Ö' => 'Oe', 'Ü' => 'Ue', 'ß' => 'ss'));
+        $dest       = CUTTER_uploadPath.$fileName;
+        move_uploaded_file($filesArray['file']['tmp_name'], $dest);
 
+        // save info in session
+        $session = \VMFDS\Cutter\Core\Session::getInstance();
+        $session->setArgument('workFile', $fileName);
+        $session->setArgument('legal', $legal);
+
+        // this is an Ajax'y action with no return, so don't show a view
+        $this->dontShowView();
+    }
 }

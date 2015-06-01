@@ -21,7 +21,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace VMFDS\Cutter\Core;
+namespace VMFDS\Cutter\Factories;
 
 /**
  * Description of ProviderFactory

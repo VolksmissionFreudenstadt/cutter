@@ -1,0 +1,6 @@
+host: www.freeimages.com
+login:
+  user: tophx78
+  password: TJ37kV1IIh
+fileNamePattern: 'freeimages_###USER###_###ID###__###TITLE###'
+legalPattern: 'freeimages / ###USER###'
