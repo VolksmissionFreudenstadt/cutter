@@ -28,6 +28,7 @@ class View
 {
     private $viewFile       = '';
     private $viewPath       = CUTTER_viewPath;
+    private $viewExtension  = 'html';
     private $loader         = null;
     private $renderer       = null;
     private $arguments      = array();
@@ -36,8 +37,7 @@ class View
 
     public function __construct($actionName)
     {
-        $this->viewFile = ucfirst($actionName).'.html';
-
+        $this->viewFile = ucfirst($actionName);
         // assign baseUrl
         $this->assign('baseUrl', CUTTER_baseUrl);
     }
@@ -68,6 +68,7 @@ class View
      */
     public function render()
     {
+        $viewFile = $this->viewFile.'.'.$this->viewExtension;
         if (!$this->rendered || $this->renderMultiple) {
             $cacheConfig = array();
             if (!CUTTER_debug) {
@@ -76,7 +77,16 @@ class View
             $this->loader   = new \Twig_Loader_Filesystem($this->viewPath);
             $this->renderer = new \Twig_Environment($this->loader, $cacheConfig);
             $this->rendered = true;
-            return $this->renderer->render($this->viewFile, $this->arguments);
+            return $this->renderer->render($viewFile, $this->arguments);
         }
+    }
+
+    /**
+     * Set the file extension for the view template (normally html)
+     * @param \string $viewExtension file extension
+     */
+    function setViewExtension($viewExtension)
+    {
+        $this->viewExtension = $viewExtension;
     }
 }
