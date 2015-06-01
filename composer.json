@@ -5,15 +5,17 @@
     "license": "GPL-3.0+",
     "type": "project",
     "repositories": [
-            {
-                "type": "vcs",
-                "url": "https://github.com/VolksmissionFreudenstadt/cutter"
-            }
-        ],
+        {
+            "type": "vcs",
+            "url": "https://github.com/VolksmissionFreudenstadt/cutter"
+        }
+    ],
     "require": {
         "twig/twig": "~1.0"
     },
     "autoload": {
-        "psr-4": { "VMFDS\\Cutter\\": "Classes/" }
-    }        
+        "psr-4": {
+            "VMFDS\\Cutter\\": "Classes/"
+        }
+    }
 }

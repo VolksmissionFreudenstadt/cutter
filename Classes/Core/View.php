@@ -2,7 +2,7 @@
 
 namespace VMFDS\Cutter\Core;
 
-/* 
+/*
  * CUTTER
  * Versatile Image Cutter and Processor
  * http://github.com/VolksmissionFreudenstadt/cutter
@@ -24,14 +24,16 @@ namespace VMFDS\Cutter\Core;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class View {
-    private $viewFile = '';
-    private $viewPath = 'Resources/Private/Views/';
-    private $loader = null;
-    private $renderer = null;
+class View
+{
+    private $viewFile  = '';
+    private $viewPath  = 'Resources/Private/Views/';
+    private $loader    = null;
+    private $renderer  = null;
     private $arguments = array();
 
-    public function __construct($actionName) {
+    public function __construct($actionName)
+    {
         $this->viewFile = ucfirst($actionName).'.html';
     }
 
@@ -59,15 +61,14 @@ class View {
      * Render the view
      * @return \string Rendered view
      */
-    public function render() {
+    public function render()
+    {
         $cacheConfig = array();
         if (!CUTTER_debug) {
             $cacheConfig = array('cache' => CUTTER_basePath.'Temp/Cache');
         }
-        $this->loader = new \Twig_Loader_Filesystem(CUTTER_basePath.$this->viewPath);
+        $this->loader   = new \Twig_Loader_Filesystem(CUTTER_basePath.$this->viewPath);
         $this->renderer = new \Twig_Environment($this->loader, $cacheConfig);
         return $this->renderer->render($this->viewFile, $this->arguments);
     }
-
-
 }

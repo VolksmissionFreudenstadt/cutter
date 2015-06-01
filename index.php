@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
  * CUTTER
  * Versatile Image Cutter and Processor
  * http://github.com/VolksmissionFreudenstadt/cutter
@@ -24,11 +24,12 @@
 require_once('vendor/autoload.php');
 
 // define some constants
-define ('CUTTER_debug', true);
-define ('CUTTER_basePath', __DIR__.'/');
-define ('CUTTER_uploadPath', CUTTER_basePath.'Temp/Uploads/');
-define ('CUTTER_baseUrl', (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off') ? 'https' : 'http')
-                            .'://'.$_SERVER['SERVER_NAME'].dirname($_SERVER["REQUEST_URI"].'?').'/');
+define('CUTTER_debug', true);
+define('CUTTER_basePath', __DIR__.'/');
+define('CUTTER_uploadPath', CUTTER_basePath.'Temp/Uploads/');
+define('CUTTER_baseUrl',
+    (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off') ? 'https' : 'http')
+    .'://'.$_SERVER['SERVER_NAME'].dirname($_SERVER["REQUEST_URI"].'?').'/');
 
 // error handling stuff:
 if (CUTTER_debug) {

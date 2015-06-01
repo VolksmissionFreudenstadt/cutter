@@ -31,34 +31,39 @@ namespace VMFDS\Cutter\Factories;
 class ProviderFactory extends AbstractFactory
 {
 
-    static public function getProviderNames() {
+    static public function getProviderNames()
+    {
         $classList = self::getAllClasses('Provider');
-        $names = array();
+        $names     = array();
         foreach ($classList as $class) {
             $names[] = $class::getName();
         }
         return $names;
     }
 
-    static public function getByName($name) {
-        $found = false;
+    static public function getByName($name)
+    {
+        $found     = false;
         $classList = self::getAllClasses('Provider');
         foreach ($classList as $class) {
-            if ($class::getName()==$name) $found = $class;
+            if ($class::getName() == $name) $found = $class;
         }
-        if ($found) return new $class(); else return false;
+        if ($found) return new $class();
+        else return false;
     }
 
-    static public function getHostHandler($url) {
-        $found = false;
-        $host = parse_url($url, PHP_URL_HOST);
+    static public function getHostHandler($url)
+    {
+        $found     = false;
+        $host      = parse_url($url, PHP_URL_HOST);
         $classList = self::getAllClasses('Provider');
         foreach ($classList as $class) {
             if ($class::canHandleHost($host)) {
                 if (!$found) $found = new $class();
             }
         }
-        if (!$found) throw new \Exception ('No provider found for host "'.$host.'"');
+        if (!$found)
+                throw new \Exception('No provider found for host "'.$host.'"');
         return $found;
     }
 }
