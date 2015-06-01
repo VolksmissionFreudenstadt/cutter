@@ -76,13 +76,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
             <div id="myTabContent" class="tab-content">
                 <div class="tab-pane active" id="tabCrossload">
-                    <form id="crossloadForm" method="post" action="/?action=debug" role="form">
+                    <form id="crossloadForm" method="get" role="form"  onSubmit="crossloadFormSubmit();" action="{{ baseUrl }}acquisition/import">
                         <div class="form-group">
                             <div class="input-group">
                                 <span class="input-group-btn">
                                     <button id="crossloadSubmit" class="btn btn-default" type="button">Laden</button>
                                 </span>
-                                <input class="form-control" type="text" id="url" placeholder="http://www.example.com/image1.html" /><br />
+                                <input class="form-control" type="text" id="url" name="url" placeholder="http://www.example.com/image1.html" /><br />
                             </div>
                         </div>
                         <input id="crossloadStep" name="step" type="hidden" value="0" />
@@ -90,7 +90,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </form>
                 </div>
                 <div class="tab-pane" id="tabUpload">
-                    <form id="fileupload" action="?action=uploaded" method="POST" enctype="multipart/form-data" role="form">
+                    <form id="fileupload" action="{{ baseUrl }}acquisition/uploaded" method="POST" enctype="multipart/form-data" role="form">
                         <p>
                             Bitte lade hier das Bild hoch, das du im nächsten Schritt bearbeiten möchtest ...
                         </p>

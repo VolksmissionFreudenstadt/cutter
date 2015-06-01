@@ -57,11 +57,11 @@ class AcquisitionController extends AbstractController
      */
     function importAction()
     {
-        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('importAction called');
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('acquisition/import action called');
         $request = \VMFDS\Cutter\Core\Request::getInstance();
         if (!$request->hasArgument('url')) {
             \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('No url specified, redirecting to upload');
-            $this->redirectToAction('upload');
+            $this->redirectToAction('form');
         }
         $url      = $request->getArgument('url');
         \VMFDS\Cutter\Core\Logger::getLogger()->addNotice('Starting cloud import from url '.$url);
@@ -83,7 +83,10 @@ class AcquisitionController extends AbstractController
         \VMFDS\Cutter\Core\Logger::getLogger()->addNotice('Cloud import processed with Provider "'.$provider->getName().'".');
         \VMFDS\Cutter\Core\Logger::getLogger()->addNotice('File received: '.CUTTER_uploadPath.$workFile);
         \VMFDS\Cutter\Core\Logger::getLogger()->addNotice('Legal text preset: '.$legal);
-        $this->redirectToAction('index', self::REDIRECT_JAVASCRIPT, 3000);
+
+        \VMFDS\Cutter\Core\Router::getInstance()->redirect(
+            'ui', 'index', null, null,
+            \VMFDS\Cutter\Core\Router::REDIRECT_JAVASCRIPT, 3000);
     }
 
     /**
