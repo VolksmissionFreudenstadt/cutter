@@ -36,8 +36,11 @@ if (CUTTER_debug) {
     ini_set('display_errors', 1);
 }
 
+// logging
+\VMFDS\Cutter\Core\Logger::initialize();
+
 // start session handling
-VMFDS\Cutter\Core\Session::initialize();
+\VMFDS\Cutter\Core\Session::initialize();
 
 // get a controller and run it
 $controller = new VMFDS\Cutter\Core\Controller();

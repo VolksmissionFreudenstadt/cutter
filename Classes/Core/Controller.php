@@ -40,6 +40,7 @@ class Controller extends AbstractController
      */
     function uploadAction()
     {
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('uploadAction called');
         // get list of possible providers
         $providers = \VMFDS\Cutter\Factories\ProviderFactory::getProviderNames();
         $this->view->assign('providers', $providers);
@@ -52,10 +53,12 @@ class Controller extends AbstractController
      */
     function indexAction()
     {
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('indexAction called');
         $session = \VMFDS\Cutter\Core\Session::getInstance();
 
         // redirect to upload, if we don't have a file yet
         if (!$session->hasArgument('workFile')) {
+            \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('No workFile in session, redirecting to upload');
             $this->redirectToAction('upload');
         }
         echo '<pre>';
@@ -65,6 +68,7 @@ class Controller extends AbstractController
 
     function debugAction()
     {
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('debugAction called');
         die('<pre>'.print_r($_REQUEST, 1));
     }
 
@@ -75,12 +79,16 @@ class Controller extends AbstractController
      */
     function importAction()
     {
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('importAction called');
         $request = \VMFDS\Cutter\Core\Request::getInstance();
         if (!$request->hasArgument('url')) {
+            \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('No url specified, redirecting to upload');
             $this->redirectToAction('upload');
         }
         $url      = $request->getArgument('url');
+        \VMFDS\Cutter\Core\Logger::getLogger()->addNotice('Starting cloud import from url '.$url);
         $provider = \VMFDS\Cutter\Factories\ProviderFactory::getHostHandler($url);
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Using provider class '.get_class($provider));
 
         // render the view prematurely (waiting ...)
         $this->renderView();
@@ -89,10 +97,14 @@ class Controller extends AbstractController
         print_r($provider);
 
         // save data in session and redirect to index
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Import done, saving to session.');
         $session = \VMFDS\Cutter\Core\Session::getInstance();
         $session->setArgument('workFile', $provider->workFile);
         $session->setArgument('legal', $provider->legal);
 
+        \VMFDS\Cutter\Core\Logger::getLogger()->addNotice('Cloud import processed with Provider "'.$provider->getName().'".');
+        \VMFDS\Cutter\Core\Logger::getLogger()->addNotice('File received: '.CUTTER_uploadPath.$workFile);
+        \VMFDS\Cutter\Core\Logger::getLogger()->addNotice('Legal text preset: '.$legal);
         $this->redirectToAction('index', self::REDIRECT_JAVASCRIPT, 3000);
     }
 
@@ -103,6 +115,7 @@ class Controller extends AbstractController
      */
     function receiveAction()
     {
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('receiveAction called.');
         $request = \VMFDS\Cutter\Core\Request::getInstance();
         if (!$request->hasFilesArray()) {
             $this->redirectToAction('upload');
