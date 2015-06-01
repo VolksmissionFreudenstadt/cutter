@@ -37,6 +37,9 @@ class View
     public function __construct($actionName)
     {
         $this->viewFile = ucfirst($actionName).'.html';
+
+        // assign baseUrl
+        $this->assign('baseUrl', CUTTER_baseUrl);
     }
 
     /**
