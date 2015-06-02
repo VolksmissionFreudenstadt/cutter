@@ -4,3 +4,5 @@
 /Temp/Uploads/*
 /Temp/Processed/*
 /Configuration/Connectors/Kool.yaml
+/Logs/*
+/Assets/*

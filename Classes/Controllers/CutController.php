@@ -67,22 +67,26 @@ class CutController extends AbstractController
         $processor = $template->getProcessorObject();
         $processor->setOptionsArray($template->getProcessorOptions());
 
-        // import image from a converter
-        $imageFile = CUTTER_uploadPath.$session->getArgument('workFile');
-        $converter = \VMFDS\Cutter\Factories\ConverterFactory::getFileHandler($imageFile);
-        $image     = $converter->getImage($imageFile);
-
-        $dstImage = ImageCreateTrueColor($template->getWidth(),
-            $template->getHeight());
-        imagecopyresampled($dstImage, $image, 0, 0, $request->getArgument('x'),
-            $request->getArgument('y'), $template->getWidth(),
-            $template->getHeight(), $request->getArgument('w'),
-            $request->getArgument('h'));
-
         $destinationFile = CUTTER_basePath.'Temp/Processed/'.
             pathinfo($session->getArgument('workFile'), PATHINFO_FILENAME)
             .'_'.$template->getSuffix().'.jpg';
-        imagejpeg($dstImage, $destinationFile, 100);
+
+        // import image from a converter
+        $imageFile = CUTTER_uploadPath.$session->getArgument('workFile');
+        $converter = \VMFDS\Cutter\Factories\ConverterFactory::getFileHandler($imageFile);
+
+        // process image
+        $image = new \VMFDS\Cutter\Core\Image($converter->getImage($imageFile));
+        $image->resize($request->getArgument('x'), $request->getArgument('y'),
+            $template->getWidth(), $template->getHeight(),
+            $request->getArgument('w'), $request->getArgument('h'));
+        if ($request->hasArgument('legal')) {
+            $legal = $request->getArgument('legal');
+            \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Legal text is "'.$legal.'"');
+            $image->setLegalText($legal, $template->getWidth(),
+                $template->getHeight());
+        }
+        $image->toJpeg($destinationFile, 100);
 
         $this->data = $this->callProcessor($processor, $destinationFile);
     }
