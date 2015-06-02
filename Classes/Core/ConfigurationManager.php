@@ -65,4 +65,55 @@ class ConfigurationManager
         }
         return $this->conf[$setTitle];
     }
+
+    /**
+     * Set default values from another array
+     *
+     * @param array lc Array to process
+     * @param array c Array with default values
+     * @return array New array with default values set
+     */
+    function setDefaults($lc, $c)
+    {
+        $lc = $this->arrayMergeRecursiveDistinct($c['defaults'], $lc);
+        return $lc;
+    }
+
+    /**
+     * Merge arrays
+     *
+     * arrayMergeRecursiveDistinct does indeed merge arrays, but it converts values with duplicate
+     * keys to arrays rather than overwriting the value in the first array with the duplicate
+     * value in the second array, as array_merge does. I.e., with array_merge_recursive,
+     * this happens (documented behavior):
+     *
+     * arrayMergeRecursiveDistinct(array('key' => 'org value'), array('key' => 'new value'));
+     * 	 => array('key' => array('org value', 'new value'));
+     *
+     * arrayMergeRecursiveDistinct does not change the datatypes of the values in the arrays.
+     * Matching keys' values in the second array overwrite those in the first array, as is the
+     * case with array_merge, i.e.:
+     *
+     * arrayMergeRecursiveDistinct(array('key' => 'org value'), array('key' => 'new value'));
+     * 	 => array('key' => 'new value');
+     *
+     * Parameters are passed by reference, though only for performance reasons. They're not
+     * altered by this function.
+     *
+     * @param array $array1
+     * @param mixed $array2
+     * @author daniel@danielsmedegaardbuus.dk
+     * @return array
+     */
+    protected function arrayMergeRecursiveDistinct($array1, $array2 = null)
+    {
+        $merged       = $array1;
+        if (is_array($array2))
+                foreach ($array2 as $key => $val)
+                if (is_array($array2[$key]))
+                        $merged[$key] = is_array($merged[$key]) ? $this->arrayMergeRecursiveDistinct($merged[$key],
+                            $array2[$key]) : $array2[$key];
+                else $merged[$key] = $val;
+        return $merged;
+    }
 }
