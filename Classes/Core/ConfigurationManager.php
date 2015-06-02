@@ -60,10 +60,15 @@ class ConfigurationManager
     public function getConfigurationSet($setTitle, $folderTitle = '')
     {
         $folderTitle = $folderTitle ? ucfirst($folderTitle).'/' : '';
-        if (!isset($this->conf[$setTitle])) {
-            $this->conf[$setTitle] = yaml_parse_file(CUTTER_basePath.'/Configuration/'.$folderTitle.ucfirst($setTitle).'.yaml');
+        if (!isset($this->conf['_'.$folderTitle][$setTitle])) {
+            $yamlFile = CUTTER_basePath.'/Configuration/'.$folderTitle.ucfirst($setTitle).'.yaml';
+            if (file_exists($yamlFile)) {
+                $this->conf['_'.$folderTitle][$setTitle] = yaml_parse_file($yamlFile);
+            } else {
+                $this->conf['_'.$folderTitle][$setTitle] = array();
+            }
         }
-        return $this->conf[$setTitle];
+        return $this->conf['_'.$folderTitle][$setTitle];
     }
 
     /**
