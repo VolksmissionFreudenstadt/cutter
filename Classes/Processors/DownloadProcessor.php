@@ -21,44 +21,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace VMFDS\Cutter\Controllers;
+namespace VMFDS\Cutter\Processors;
 
 /**
- * Description of JsController
+ * Description of DownloadProcessor
  *
  * @author chris
  */
-class JsController extends AbstractController
+class DownloadProcessor extends AbstractProcessor
 {
-
-    protected function initializeController()
-    {
-        parent::initializeController();
-        $this->view->setContentType('application/javascript');
-        $this->view->setViewExtension('js');
-    }
+    protected $icon = 'save';
 
     /**
-     * Provide a dummy /js/cutter JavaScript to set base url
+     * Process an image file
+     * @param \string $fileName Path to file
+     * @param array $options Options
+     * @return variant Return values
      */
-    public function cutterAction()
+    public function process($fileName, $options)
     {
-
-    }
-
-    /**
-     * Upload UI script
-     */
-    public function uploadUiAction()
-    {
-
-    }
-
-    /**
-     * Main UI script
-     */
-    public function UiAction()
-    {
-
+        return array(
+            'result' => self::RESULT_OK,
+            'forceDownload' => str_replace(CUTTER_basePath, CUTTER_baseUrl,
+                $fileName),
+        );
     }
 }

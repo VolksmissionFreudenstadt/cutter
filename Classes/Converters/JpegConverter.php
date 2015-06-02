@@ -21,44 +21,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace VMFDS\Cutter\Controllers;
+namespace VMFDS\Cutter\Converters;
 
 /**
- * Description of JsController
+ * Description of JpegConverter
  *
  * @author chris
  */
-class JsController extends AbstractController
+class JpegConverter extends AbstractConverter
 {
 
-    protected function initializeController()
+    /**
+     * Checks if this converter can handle a given image
+     * @param \string $imageFile Image file name
+     * @return boolean True if image can be handled
+     */
+    static function canHandleImage($imageFile)
     {
-        parent::initializeController();
-        $this->view->setContentType('application/javascript');
-        $this->view->setViewExtension('js');
+        return (self::getMimeType($imageFile) == 'image/jpeg');
     }
 
-    /**
-     * Provide a dummy /js/cutter JavaScript to set base url
-     */
-    public function cutterAction()
+    public function getImage($imageFile)
     {
-
-    }
-
-    /**
-     * Upload UI script
-     */
-    public function uploadUiAction()
-    {
-
-    }
-
-    /**
-     * Main UI script
-     */
-    public function UiAction()
-    {
-
+        return imagecreatefromjpeg($imageFile);
     }
 }

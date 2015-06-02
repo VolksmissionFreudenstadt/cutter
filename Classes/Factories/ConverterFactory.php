@@ -21,44 +21,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace VMFDS\Cutter\Controllers;
+namespace VMFDS\Cutter\Factories;
 
 /**
- * Description of JsController
+ * Description of ProviderFactory
  *
  * @author chris
  */
-class JsController extends AbstractController
+class ConverterFactory extends AbstractFactory
 {
 
-    protected function initializeController()
+    static public function getFileHandler($imageFile)
     {
-        parent::initializeController();
-        $this->view->setContentType('application/javascript');
-        $this->view->setViewExtension('js');
-    }
-
-    /**
-     * Provide a dummy /js/cutter JavaScript to set base url
-     */
-    public function cutterAction()
-    {
-
-    }
-
-    /**
-     * Upload UI script
-     */
-    public function uploadUiAction()
-    {
-
-    }
-
-    /**
-     * Main UI script
-     */
-    public function UiAction()
-    {
-
+        $found     = false;
+        $classList = self::getAllClasses('Converter');
+        foreach ($classList as $class) {
+            if ($class::canHandleImage($imageFile)) {
+                if (!$found) $found = new $class();
+            }
+        }
+        if (!$found)
+                throw new \Exception('No converter found for file "'.$imageFile.'"');
+        return $found;
     }
 }

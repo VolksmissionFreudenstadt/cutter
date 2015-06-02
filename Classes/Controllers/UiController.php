@@ -53,11 +53,30 @@ class UiController extends AbstractController
         $this->view->assign('image',
             CUTTER_baseUrl.'Temp/Uploads/'.$session->getArgument('workFile'));
         $this->view->assign('legal', $session->getArgument('legal'));
+
+        $info = \VMFDS\Cutter\Factories\TemplateFactory::getTemplateInfo();
+        $this->view->assign('templates', $info);
+
+        $templateKeys  = array_keys($info);
+        $firstGroup    = array_keys($info[$templateKeys[0]]);
+        $firstTemplate = $firstGroup[0];
+        $this->view->assign('firstTemplate', $firstTemplate);
     }
 
     function debugAction()
     {
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('debugAction called');
         die('<pre>'.print_r($_REQUEST, 1));
+    }
+
+    /**
+     * Download script
+     */
+    public function downloadAction()
+    {
+        $request = \VMFDS\Cutter\Core\Request::getInstance();
+        if ($request->hasArgument('url')) {
+            $this->view->assign('url', $request->getArgument('url'));
+        }
     }
 }

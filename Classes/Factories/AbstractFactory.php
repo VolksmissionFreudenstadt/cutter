@@ -30,6 +30,7 @@ namespace VMFDS\Cutter\Factories;
  */
 class AbstractFactory
 {
+    static protected $ns = '';
 
     static public function getAllClasses($type)
     {
@@ -53,5 +54,33 @@ class AbstractFactory
         }
         closedir($handle);
         return $classes;
+    }
+
+    /**
+     * Get this factory's key (class without namespace and 'Factory')
+     * @return \string
+     */
+    static public function getKey()
+    {
+        $class = get_called_class();
+        return str_replace('Factory', '',
+            str_replace('VMFDS\\Cutter\\Factories\\', '', $class));
+    }
+
+    /**
+     * Get a single object
+     * @param \string $key Key
+     * @return object Template Object
+     */
+    static public function get($key)
+    {
+        $factoryType = self::getKey();
+        $ns          = (self::$ns ? self::$ns : $factoryType.'s');
+        $className   = '\\VMFDS\\Cutter\\'.$ns.'\\'.ucFirst($key).$factoryType;
+        if (class_exists($className)) {
+            return new $className();
+        } else {
+            return false;
+        }
     }
 }

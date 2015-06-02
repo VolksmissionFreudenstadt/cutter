@@ -21,44 +21,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace VMFDS\Cutter\Controllers;
+namespace VMFDS\Cutter\Templates;
 
 /**
- * Description of JsController
+ * Description of WebSingleTemplate
  *
  * @author chris
  */
-class JsController extends AbstractController
+class GemeindeinfoTemplate extends AbstractTemplate
 {
+    protected $category  = 'Veranstaltungen';
+    protected $height    = 200;
+    protected $width     = 550;
+    protected $processor = 'Download';
+    protected $suffix    = 'ginfo';
+    protected $title     = 'Gemeindeinfo';
 
-    protected function initializeController()
-    {
-        parent::initializeController();
-        $this->view->setContentType('application/javascript');
-        $this->view->setViewExtension('js');
-    }
-
-    /**
-     * Provide a dummy /js/cutter JavaScript to set base url
-     */
-    public function cutterAction()
-    {
-
-    }
-
-    /**
-     * Upload UI script
-     */
-    public function uploadUiAction()
-    {
-
-    }
-
-    /**
-     * Main UI script
-     */
-    public function UiAction()
-    {
-
-    }
 }

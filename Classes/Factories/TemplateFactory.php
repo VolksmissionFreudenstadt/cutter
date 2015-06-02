@@ -21,44 +21,44 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace VMFDS\Cutter\Controllers;
+namespace VMFDS\Cutter\Factories;
 
 /**
- * Description of JsController
+ * Description of TemplateFactory
  *
  * @author chris
  */
-class JsController extends AbstractController
+class TemplateFactory extends AbstractFactory
 {
 
-    protected function initializeController()
+    /**
+     * Get Template info
+     * @return type
+     */
+    static public function getTemplateInfo()
     {
-        parent::initializeController();
-        $this->view->setContentType('application/javascript');
-        $this->view->setViewExtension('js');
+        $classList = self::getAllClasses('Template');
+        $info      = array();
+        foreach ($classList as $class) {
+            $template                            = new $class();
+            $tmp                                 = $template->getTemplateInfo();
+            $info[$tmp['category']][$tmp['key']] = $tmp;
+        }
+        return $info;
     }
 
     /**
-     * Provide a dummy /js/cutter JavaScript to set base url
+     * Get Template object
+     * @param \string $key Key
+     * @return object Template Object
      */
-    public function cutterAction()
+    static public function get($key)
     {
-
-    }
-
-    /**
-     * Upload UI script
-     */
-    public function uploadUiAction()
-    {
-
-    }
-
-    /**
-     * Main UI script
-     */
-    public function UiAction()
-    {
-
+        $className = '\\VMFDS\\Cutter\\Templates\\'.ucFirst($key).'Template';
+        if (class_exists($className)) {
+            return new $className();
+        } else {
+            return $false;
+        }
     }
 }

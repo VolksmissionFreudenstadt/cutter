@@ -21,44 +21,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace VMFDS\Cutter\Controllers;
+namespace VMFDS\Cutter\Factories;
 
 /**
- * Description of JsController
+ * Description of TemplateFactory
  *
  * @author chris
  */
-class JsController extends AbstractController
+class ProcessorFactory extends AbstractFactory
 {
 
-    protected function initializeController()
-    {
-        parent::initializeController();
-        $this->view->setContentType('application/javascript');
-        $this->view->setViewExtension('js');
-    }
-
     /**
-     * Provide a dummy /js/cutter JavaScript to set base url
+     * Get all glyphicons
+     * @return array Glyphicon info
      */
-    public function cutterAction()
+    static public function getIcons()
     {
-
-    }
-
-    /**
-     * Upload UI script
-     */
-    public function uploadUiAction()
-    {
-
-    }
-
-    /**
-     * Main UI script
-     */
-    public function UiAction()
-    {
-
+        $classList = self::getAllClasses('Processor');
+        $info      = array();
+        foreach ($classList as $class) {
+            $processor                  = new $class();
+            $info[$processor->getKey()] = $processor->getIcon();
+        }
+        return $info;
     }
 }

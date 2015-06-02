@@ -67,7 +67,7 @@ class AbstractController
         $actionMethod    = $requestedAction.'Action';
         if (!method_exists($this, $actionMethod)) {
             \VMFDS\Cutter\Core\Logger::getLogger()->addEmergency(
-                'Method "'.$requestedAction.'" not implemented in this controller.');
+                'Method "'.$actionMethod.'" not implemented in controller'.get_class($this).' .');
             throw new \Exception('Method "'.$requestedAction.'" not implemented in this controller.',
             0x01);
         } else {

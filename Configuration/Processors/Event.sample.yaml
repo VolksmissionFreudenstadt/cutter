@@ -1,0 +1,21 @@
+kOOL:
+  db:
+    host: localhost
+    user: 
+    pass: 
+    name: 
+    event_table: ko_event
+    group_table: ko_eventgruppen
+  event_select:
+    category_field: my_vmfds_events_categories
+    allowed_categories:  #only events from these categories will be shown
+      - 5 #Teaser Gemeinde
+      - 9 #Teaser RR
+      - 15 #Teaser Kiga
+      - 16 #Teaser Advent
+      - 17 #Gemeindeinfo
+      - 18 #pLuS Akademie
+    range:
+      start: now
+      end: +2 years
+    order_by: startdatum

@@ -7,61 +7,42 @@
         <title>CUTTER</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-        <link rel="stylesheet" href="css/jquery.Jcrop.css" type="text/css" />
+        <link rel="stylesheet" href="{{ baseUrl }}Resources/Public/css/jquery.Jcrop.css" type="text/css" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-        <script src="js/jquery.Jcrop.js"></script>
-        <script src="js/holder/holder.js"></script>
-        <script src="js/cutter-ui.js"></script>
+        <script src="{{ baseUrl }}Resources/Public/js/jquery.Jcrop.js"></script>
+        <script src="{{ baseUrl }}Resources/Public/js/holder/holder.js"></script>
+        <script src="{{ baseUrl }}js/ui.js"></script>
 
     </head>
     <body>
 
-        <script type="text/javascript">
-            var steps = <?= json_encode($config['targets']) ?>;
-            var icons = <?= json_encode($glyphicon) ?>;
-            $(document).ready(function () {
-                loadStep(<?= $step ?>);
-            });
-        </script>
-
-        <div id="options" style="display: none">
-            <input type="hidden" id="option-w" name="w" />
-            <input type="hidden" id="option-h" name="h" />
-            <input type="hidden" id="option-step" name="step" />
-            <input type="hidden" id="option-title" name="title" />
-            <input type="hidden" id="option-mode" name="mode" />
-            <input type="hidden" id="option-legal" name="legal" />
-        </div>
-
         <div class="container">
             <div class="col-md-4">
-                <div class="list-group">
-
-                    <?php
-                    // step selectors
-                    $stepCtr = 0;
-                    foreach ($config['targets'] as $stepIdx => $t) {
-
-                        $t = setDefaults($t, $config,
-                            array('mode ', 'destination',
-                            'jpeg_quality', 'legal'));
-
-                        echo '<a href = "#" class = "list-group-item stepSelector '.(($stepIdx
-                        == $step) ? 'active' : '').'" '
-                        .'data-step = "'.$stepIdx.'" '
-                        .'data-w = "'.$t['w'].'" '
-                        .'data-h = "'.$t['h'].'" '
-                        .'data-title = "'.$t['title'].'" '
-                        .'data-mode = "'.$t['mode'].'" '
-                        .'data-legal = "'.$t['legal'].'" '
-                        .'>';
-                        echo $glyphicon[$t['mode']].$t['title']
-                        .'<span class = "badge">'.$t['w'].'x'.$t['h'].'</span>';
-                        echo '</a>'."\r\n";
-                    }
-                    $stepCtr ++;
-                    ?>
+                <div class="panel-group" id="accordion">
+                    {% for templateGroupTitle,templateGroup in templates %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#group{{ templateGroupTitle }}">{{ templateGroupTitle }}</a>
+                            </h4>
+                        </div>
+                        <div id="group{{ templateGroupTitle }}" class="panel-collapse collapse in">
+                            <div class="panel-body">
+                                {% for template in templateGroup %}
+                                <a href="#" class="list-group-item templateSelector" 
+                                   data-template="{{ template.key }}">
+                                        <span class="glyphicon glyphicon-{{ template.icon }}"></span>&nbsp;                                       
+                                       {{ template.title }}
+                                       <span class="badge">
+                                       {{template.w}} x {{template.h}}
+                                       </span>
+                                </a>
+                                {% endfor %}
+                            </div>                           
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
 
@@ -69,8 +50,8 @@
             <div class="col-md-8">
 
                 <div class="page-header">
-                    <h1 id="stepTitle"><?= $stepTitle ?></h1>
-                    <span id="stepIcon"></span><span id="measurements"></span>
+                    <h1 id="stepTitle"></h1>
+                    <span id="stepIcon"><span class="glyphicon glyphicon-{{ template.icon }}"></span>&nbsp;</span><span id="measurements"></span>
                     <span id="customAR"><input type="text" size="4" id="myW" name="myW">x<input type="text" size="4" id="myH" name="myH"></span>
                     &nbsp;
                     <button id="btnCut" type="button" class="btn btn-success">Bild zuschneiden</button>
@@ -79,6 +60,7 @@
 
                 <!-- This is the image we're attaching Jcrop to -->
                 <img src = "{{ image }}" id = "cropbox" />
+                <span id="data-container"></span>
 
                 <!--This is the form that our event handler fills -->
                 <form action = "cut.php" method = "post" onsubmit = "return checkCoords();">
@@ -90,20 +72,14 @@
                     <input type = "hidden" id = "customARH" name = "customARH" />
                     <input type = "hidden" id = "step" name = "step" value = "<?= $step ?>" />
                     <input type = "hidden" id = "image" name = "image" value = "<?= $image ?>" /><br />
-                    <div id = "mode-event">
-                        Dieses Bild folgender Veranstaltung zuordnen: <br />
-                        <span id="eventSelect"></span>
-                        <br />
-                    </div>
-                    <div id = "mode-sermon">
-                        Dieses Bild folgender Predigt zuordnen: <br />
-                        <span id="sermonSelect"></span>
-                        <br />
-                    </div>
+                    <div id = "arguments"></div>
                     <label for="legal">Quellenangaben zum Bild:</label><input type="text" id="legal" name="legal" value="{{ legal }}" /><br />
+                    <div id="results" role="alert"></div>
+                    <iframe id="resultsFrame" style="width: 1px; height: 1px; border: none;"></iframe>
                 </form>
             </div>
         </div>
+        <script type="text/javascript">loadTemplate('{{ firstTemplate }}');</script>
     </body>
 
 </html>

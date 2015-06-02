@@ -148,4 +148,20 @@ class Request
         }
         $this->data['_raw'] = $uriItems;
     }
+
+    /**
+     * Get multiple arguments at once
+     * @param array $args Argument keys
+     * @return array Argument values
+     */
+    public function getArgumentsArray($args)
+    {
+        $data = array();
+        foreach ($args as $arg) {
+            if ($this->hasArgument($arg)) {
+                $data[$arg] = $this->getArgument($arg);
+            }
+        }
+        return $data;
+    }
 }
