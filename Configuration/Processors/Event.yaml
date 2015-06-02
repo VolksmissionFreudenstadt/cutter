@@ -1,11 +1,9 @@
+move_to: /home/vmfredbb/intranet/verwaltung/my_images/
 kOOL:
+  event_image_path: my_images/
   db:
-    host: localhost
-    user: 
-    pass: 
-    name: 
     event_table: ko_event
-    group_table: ko_eventgruppen
+    group_table: ko_eventgruppen      
   event_select:
     category_field: my_vmfds_events_categories
     allowed_categories:  #only events from these categories will be shown

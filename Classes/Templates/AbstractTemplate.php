@@ -30,12 +30,13 @@ namespace VMFDS\Cutter\Templates;
  */
 class AbstractTemplate
 {
-    protected $category  = '';
-    protected $height    = 0;
-    protected $width     = 0;
-    protected $processor = '';
-    protected $suffix    = '';
-    protected $title     = '';
+    protected $category         = '';
+    protected $height           = 0;
+    protected $width            = 0;
+    protected $processor        = '';
+    protected $suffix           = '';
+    protected $title            = '';
+    protected $processorOptions = array();
 
     public function getTemplateInfo()
     {
@@ -100,5 +101,10 @@ class AbstractTemplate
     public function getTitle()
     {
         return $this->title;
+    }
+
+    public function getProcessorOptions()
+    {
+        return $this->processorOptions;
     }
 }

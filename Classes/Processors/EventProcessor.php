@@ -24,20 +24,23 @@
 namespace VMFDS\Cutter\Processors;
 
 /**
- * Description of DownloadProcessor
+ * Description of EventProcessor
  *
  * @author chris
  */
 class EventProcessor extends AbstractProcessor
 {
-    protected $icon = 'calendar';
-    protected $kool = array();
+    protected $icon          = 'calendar';
+    protected $configuration = array();
+    protected $kool          = null;
 
     public function __construct()
     {
         parent::__construct();
-        $confManager = \VMFDS\Cutter\Core\ConfigurationManager::getInstance();
-        $this->kool  = $confManager->getConfigurationSet('event', 'Processors');
+        $confManager         = \VMFDS\Cutter\Core\ConfigurationManager::getInstance();
+        $this->configuration = $confManager->getConfigurationSet('event',
+            'Processors');
+        $this->kool          = new \VMFDS\Cutter\Connectors\koolConnector();
     }
 
     public function getAdditionalFields()
@@ -58,21 +61,15 @@ class EventProcessor extends AbstractProcessor
      */
     private function kOOLEventSelect($eid = NULL)
     {
-        global $config;
-
-        // connect to db
-        $dbConf = $this->kool['kOOL']['db'];
-        $db     = mysql_connect($dbConf['host'], $dbConf['user'],
-            $dbConf['pass']);
-        mysql_select_db($dbConf['name'], $db);
+        $dbConf = $this->configuration['kOOL']['db'];
 
         // build sql
-        $eConf = $this->kool['kOOL']['event_select'];
+        $eConf = $this->configuration['kOOL']['event_select'];
         $where = array();
         $sql   = 'SELECT event.id, event.title,event.startdatum,event.kommentar FROM '.$dbConf['event_table'].' event LEFT JOIN '.$dbConf['group_table'].' grp ON (event.eventgruppen_id = grp.id) ';
         if ($this->getOption('allowed_calendars')) {
             $where[] = '(grp.calendar_id IN ('.join(',',
-                    $localConfig['allowed_calendars']).'))';
+                    $this->getOption('allowed_calendars')).'))';
         }
         if ($eConf['range']['start'])
                 $where[] = '(event.startdatum>=\''.date('Y-m-d',
@@ -92,13 +89,12 @@ class EventProcessor extends AbstractProcessor
         if ($eConf['order_by'])
                 $sql .= ' ORDER BY event.'.$eConf['order_by'].' ASC';
         $sql.=';';
-        //die ($sql);
-        // execute
-        $res     = mysql_query($sql);
+
+        $events = $this->kool->getAll($sql);
 
         // build select
         $select = '<select name="event" id="event"><option value="-1"></option>';
-        while ($row    = mysql_fetch_assoc($res)) {
+        foreach ($events as $row) {
             $rowTitle = utf8_encode($row['title'] ? $row['title'] : $row['kommentar']);
             $select .= '<option value="'.$row['id'].' '.(($row['id'] == $eid) ? ' selected'
                         : '').'">'.strftime('%d.%m.%Y',
@@ -118,9 +114,36 @@ class EventProcessor extends AbstractProcessor
     public function process($fileName, $options)
     {
         if ($this->checkRequiredArguments($options)) {
-            die(print_r($options, 1));
-            return true;
+            if ($options['event'] != -1) {
+                // move file:
+                $destFile = $destFile = pathinfo($fileName, PATHINFO_BASENAME);
+                copy($fileName, $this->configuration['move_to'].$destFile);
+                $this->kOOLAssignEvent(
+                    $this->configuration['kOOL']['event_image_path'].$destFile,
+                    $options['event'], $this->getOption('event_field'));
+                return array('result' => self::RESULT_OK);
+            } else {
+                return array('result' => self::RESULT_FALLBACK);
+            }
         }
+    }
+
+    /**
+     * Assign an image to an event field in the kOOL database
+     *
+     * @param string image Image file name
+     * @param int event Id of the event
+     * @param string field Field to fill with the image info
+     * @return void
+     */
+    private function kOOLAssignEvent($image, $event, $field)
+    {
+        // connect to db
+        $dbConf = $this->configuration['kOOL']['db'];
+        $sql    = 'UPDATE '.$dbConf['event_table'].' SET '
+            .$field.'=\''.$this->getOption('event_image_path').$image
+            .'\' WHERE id='.$event.';';
+        $this->kool->query($sql);
     }
 
     /**

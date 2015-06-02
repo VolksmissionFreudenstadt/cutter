@@ -66,6 +66,11 @@ class AbstractProcessor
         return array();
     }
 
+    public function setOptionsArray($arr)
+    {
+        $this->localConfig = $arr;
+    }
+
     public function setOption($key, $value)
     {
         $this->localConfig[$key] = $value;

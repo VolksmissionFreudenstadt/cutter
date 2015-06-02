@@ -3,4 +3,4 @@
 /Temp/Cache/*
 /Temp/Uploads/*
 /Temp/Processed/*
-/Configuration/Processors/Event.yaml
+/Configuration/Connectors/Kool.yaml

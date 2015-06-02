@@ -56,15 +56,16 @@ class CutController extends AbstractController
         $session = \VMFDS\Cutter\Core\Session::getInstance();
         $request = \VMFDS\Cutter\Core\Request::getInstance();
         // we just die, since this is a headless controller
-        if (!$session->hasArgument('workFile')) die();
-        if (!$request->hasArgument('x')) die();
-        if (!$request->hasArgument('y')) die();
-        if (!$request->hasArgument('w')) die();
-        if (!$request->hasArgument('h')) die();
-        if (!$request->hasArgument('template')) die();
+        if (!$session->hasArgument('workFile')) die('workfile');
+        if (!$request->hasArgument('x')) die('x');
+        if (!$request->hasArgument('y')) die('y');
+        if (!$request->hasArgument('w')) die('w');
+        if (!$request->hasArgument('h')) die('h');
+        if (!$request->hasArgument('template')) die('template');
 
         $template  = \VMFDS\Cutter\Factories\TemplateFactory::get($request->getArgument('template'));
         $processor = $template->getProcessorObject();
+        $processor->setOptionsArray($template->getProcessorOptions());
 
         // import image from a converter
         $imageFile = CUTTER_uploadPath.$session->getArgument('workFile');

@@ -21,24 +21,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace VMFDS\Cutter\Templates;
+namespace VMFDS\Cutter\Connectors;
 
 /**
- * Description of WebSingleTemplate
+ * Description of koolConnector
  *
  * @author chris
  */
-class WebSingleTemplate extends AbstractTemplate
+class koolConnector extends AbstractConnector
 {
-    protected $category         = 'Veranstaltungen';
-    protected $height           = 437;
-    protected $width            = 582;
-    protected $processor        = 'Event';
-    protected $suffix           = 'single';
-    protected $title            = 'Einzelansicht';
-    protected $processorOptions = array(
-        'event_field' => 'my_vmfds_events_picture',
-        'event_image_path' => '',
-    );
-
+    
 }
