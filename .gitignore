@@ -4,5 +4,6 @@
 /Temp/Uploads/*
 /Temp/Processed/*
 /Configuration/Connectors/Kool.yaml
+/Configuration/Connectors/Sermon.yaml
 /Logs/*
 /Assets/*
