@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <html lang="de">
     <head>
-        <title>CUTTER: Bilddatei hochladen ...</title>
+        <title>CUTTER: Bilddatei auswählen ...</title>
         <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
@@ -37,45 +37,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <div class="container">
 
             <div class="page-header">
-                <h1><span class="glyphicon glyphicon-open">&nbsp;</span>Bilddatei hochladen...</h1>
+                <h1>Bilddatei auswählen...</h1>
             </div>
-
-            <h2>Quellenangaben</h2>
-
-            <form id="legal" role="form">
-                <div class="form-group">
-                    <label for="provider_user">Internetseite</label>
-                    <div class="input-group">
-                        <div class="input-group-btn">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span id="btnProviderSite">{{ providers.0 }}</span> <span class="caret"></span></button>
-                            <ul>
-                                {% for item in providers %}
-                                <li class="providerOption">
-                                    <a href="#">{{ item }}</a>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        <input class="form-control" type="text" id="provider_user" placeholder="benutzername"/><br />
-                    </div>
-                    <div class="form-group">
-                        <label for="legal_freetext">oder Freitext:</label>
-                        <input class="form-control" type="text" id="legal_freetext" placeholder="Copyright" /><br />
-                    </div>
-            </form>
-
-            <h2>Bild</h2>
-
-
-            <ul id="myTab" class="nav nav-tabs" data-tabs="tabs">
-                <li class="active"><a href="#tabCrossload" data-toggle="tab">
-                        <span class="glyphicon glyphicon-cloud"></span>&nbsp;Aus der Cloud laden</a></li>
-                <li><a href="#tabUpload" data-toggle="tab">
-                        <span class="glyphicon glyphicon-open"></span>&nbsp;Upload von meinem Computer</a></li>
+            
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#cloud"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Cloud</a></li>
+                <li><a data-toggle="tab" href="#local"><span class="glyphicon glyphicon-open"></span>&nbsp;Lokaler PC</a></li>
             </ul>
-
-            <div id="myTabContent" class="tab-content">
-                <div class="tab-pane active" id="tabCrossload">
+            
+            <div class="tab-content">
+                <div id="cloud" class="tab-pane fade in active">
+                    <h2>Mein Bild kommt aus der Cloud</h2>
                     <form id="crossloadForm" method="get" role="form"  onSubmit="crossloadFormSubmit();" action="{{ baseUrl }}acquisition/import">
                         <div class="form-group">
                             <div class="input-group">
@@ -89,7 +61,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         <input id="crossloadLegal" name="step" type="hidden" value="" />
                     </form>
                 </div>
-                <div class="tab-pane" id="tabUpload">
+                <div id="local" class="tab-pane fade">
+                    <h2>Mein Bild kommt von meinem Computer</h2>
+                    <h3>Quellenangaben</h3>
+                    <form id="legal" role="form">
+                        <div class="form-group">
+                            <label for="provider_user">Internetseite</label>
+                            <div class="input-group">
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span id="btnProviderSite">{{ providers.0 }}</span> <span class="caret"></span></button>
+                                    <ul>
+                                        {% for item in providers %}
+                                        <li class="providerOption">
+                                            <a href="#">{{ item }}</a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <input class="form-control" type="text" id="provider_user" placeholder="benutzername"/><br />
+                            </div>
+                            <div class="form-group">
+                                <label for="legal_freetext">oder Freitext:</label>
+                                <input class="form-control" type="text" id="legal_freetext" placeholder="Copyright" /><br />
+                            </div>
+                    </form>
+                    <h3>Bild</h3>
                     <form id="fileupload" action="{{ baseUrl }}acquisition/uploaded" method="POST" enctype="multipart/form-data" role="form">
                         <p>
                             Bitte lade hier das Bild hoch, das du im nächsten Schritt bearbeiten möchtest ...
@@ -102,14 +98,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                     </form>
                     <div id="fileuploader">Bild hochladen</div>
+                    
                 </div>
             </div>
-
-
-
         </div>
-
-        <div id="eventsmessage"></div>
 
         <script src="{{ baseUrl }}js/uploadUi.js"></script>
 

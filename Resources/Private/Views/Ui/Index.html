@@ -24,10 +24,10 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#group{{ templateGroupTitle }}">{{ templateGroupTitle }}</a>
+                                <a data-toggle="collapse" data-parent="#accordion" href="#group{{ templateGroupTitle|replace({' ': '', '(': '', ')':''}) }}">{{ templateGroupTitle }}</a>
                             </h4>
                         </div>
-                        <div id="group{{ templateGroupTitle }}" class="panel-collapse collapse in">
+                        <div id="group{{ templateGroupTitle|replace({' ': '', '(': '', ')':''}) }}" class="panel-collapse collapse">
                             <div class="panel-body">
                                 {% for template in templateGroup %}
                                 <a href="#" class="list-group-item templateSelector" 
@@ -54,13 +54,11 @@
                     <span id="stepIcon"><span class="glyphicon glyphicon-{{ template.icon }}"></span>&nbsp;</span><span id="measurements"></span>
                     <span id="customAR"><input type="text" size="4" id="myW" name="myW">x<input type="text" size="4" id="myH" name="myH"></span>
                     &nbsp;
-                    <button id="btnCut" type="button" class="btn btn-success">Bild zuschneiden</button>
-                    <button id="btnAbort" type="button" class="btn btn-danger">Zurück zum Upload</button>
                 </div>
 
                 <!-- This is the image we're attaching Jcrop to -->
                 <img src = "{{ image }}" id = "cropbox" />
-                <span id="data-container"></span>
+                <div id="data-container"></div><br />
 
                 <form action = "cut.php" method = "post" onsubmit = "return checkCoords();">
                     <input type = "hidden" id = "x" name = "x" />
@@ -68,7 +66,12 @@
                     <input type = "hidden" id = "w" name = "w" />
                     <input type = "hidden" id = "h" name = "h" />
                     <div id = "arguments"></div>
-                    <label for="legal">Quellenangaben zum Bild:</label><input type="text" id="legal" name="legal" value="{{ legal }}" /><br />
+                    <div class="form-group">
+                        <label for="legal">Quellenangaben zum Bild:</label>
+                        <input type="text" id="legal" name="legal" value="{{ legal }}" class="form-control" />
+                    </div>
+                    <button id="btnCut" type="button" class="btn btn-success">Bild zuschneiden</button>
+                    <button id="btnAbort" type="button" class="btn btn-danger">Zurück zum Upload</button>
                     <div id="results" role="alert"></div>
                     <iframe id="resultsFrame" style="width: 1px; height: 1px; border: none;"></iframe>
                 </form>

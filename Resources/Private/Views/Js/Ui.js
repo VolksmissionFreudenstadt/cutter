@@ -39,14 +39,16 @@ function loadTemplate(key) {
         $('#measurements').html(data.w+' x '+data.h);
 
         // additional options
-        $.getJSON('{{ baseUrl  }}ajax/options/' + data.processor, function (opts) {
+        $.getJSON('{{ baseUrl  }}ajax/options/' + key, function (opts) {
             console.log(opts);
             
             var form = '';
             var i;
             for (i=0; i<opts.length; i++) {
+                form = form + '<div class="form-group">'
                 form = form + '<label for="' + opts[i]['key']+'">'+opts[i]['label'] + '</label> '
                         + opts[i]['form'];
+                form = form + '</div>'
             }
             $('#arguments').html(form);
             for (i=0; i<opts.length; i++) {
