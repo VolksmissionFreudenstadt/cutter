@@ -64,7 +64,9 @@ class AjaxController extends AbstractController
         $request->applyUriPattern(array('key'));
         if ($request->hasArgument('key')) {
             $key        = $request->getArgument('key');
-            $processor  = \VMFDS\Cutter\Factories\ProcessorFactory::get($key);
+            $template   = \VMFDS\Cutter\Factories\TemplateFactory::get($key);
+            $processor  = $template->getProcessorObject();
+            $processor->setOptionsArray($template->getProcessorOptions());
             $this->data = $processor->getAdditionalFields();
         }
     }

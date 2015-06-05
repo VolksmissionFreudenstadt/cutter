@@ -93,7 +93,7 @@ class EventProcessor extends AbstractProcessor
         $events = $this->kool->getAll($sql);
 
         // build select
-        $select = '<select name="event" id="event"><option value="-1"></option>';
+        $select = '<select class="form-control" name="event" id="event"><option value="-1"> -- Keine Veranstaltung, Datei herunterladen -- </option>';
         foreach ($events as $row) {
             $rowTitle = utf8_encode($row['title'] ? $row['title'] : $row['kommentar']);
             $select .= '<option value="'.$row['id'].' '.(($row['id'] == $eid) ? ' selected'
@@ -116,7 +116,7 @@ class EventProcessor extends AbstractProcessor
         if ($this->checkRequiredArguments($options)) {
             if ($options['event'] != -1) {
                 // move file:
-                $destFile = $destFile = pathinfo($fileName, PATHINFO_BASENAME);
+                $destFile = pathinfo($fileName, PATHINFO_BASENAME);
                 copy($fileName, $this->configuration['move_to'].$destFile);
                 $this->kOOLAssignEvent(
                     $this->configuration['kOOL']['event_image_path'].$destFile,

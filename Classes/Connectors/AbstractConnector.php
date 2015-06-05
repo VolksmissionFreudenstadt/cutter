@@ -55,9 +55,20 @@ class AbstractConnector
             str_replace('VMFDS\\Cutter\\Connectors\\', '', $class));
     }
 
+    public function escape($s)
+    {
+        return $this->db->real_escape_string($s);
+    }
+
     public function query($sql)
     {
-        return $this->db->query($sql);
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('SQL: '.$sql);
+        $res = $this->db->query($sql);
+        if (false === $res) {
+            \VMFDS\Cutter\Core\Logger::getLogger()->addDebug(
+                'MySQLi Error: '.$this->db->error);
+        }
+        return $res;
     }
 
     public function getAll($sql)
