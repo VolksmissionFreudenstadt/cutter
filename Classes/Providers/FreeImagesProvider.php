@@ -35,6 +35,7 @@ class FreeImagesProvider extends AbstractProvider
         'sxc.hu',
         'www.sxc.hu'
     );
+    public $hasCaptcha             = 1;
 
     /**
      * Checks if this provider can handle urls from a specific host
@@ -59,7 +60,7 @@ class FreeImagesProvider extends AbstractProvider
     {
         parent::__construct();
         $this->configuration['baseUrl']  = 'http://www.freeimages.com';
-        $this->configuration['loginUrl'] = 'http://www.freeimages.com/index.phtml';
+        $this->configuration['loginUrl'] = 'http://www.freeimages.com/signin?next=/';
     }
 
     /**
@@ -68,21 +69,28 @@ class FreeImagesProvider extends AbstractProvider
      */
     public function retrieveImage($imageUrl)
     {
-        // Deal with urls like http://www.freeimages.com/photo/7870
-        $path = parse_url($imageUrl, PHP_URL_PATH);
-        if (substr($path, 0, 7) == '/photo/') {
-            $imageUrl = 'http://www.freeimages.com/browse.phtml?f=download&id='
-                .substr($path, 7);
-        }
+        // Deal with urls like http://www.freeimages.com/photo/dices-4-1169521
 
         $this->login();
-        $doc = $this->getDOMDocument($this->getFile($imageUrl));
-        $src = $this->getSourceUrl($doc);
-
+        //$src = $this->getSourceUrl($doc);
         // extract info from document title
-        $title   = $this->getDocTitle($doc);
-        $markers = $this->regexMarkers('/(.*)\(Stock Photo By (.*)\) \[ID: (.*)\]/is',
-            $title, array(1 => 'title', 2 => 'user', 3 => 'id'));
+        $path             = str_replace('/photo/', '',
+            parse_url($imageUrl, PHP_URL_PATH));
+        $tmp              = explode('-', $path);
+        $markers['id']    = $tmp[count($tmp) - 1];
+        unset($tmp[count($tmp) - 1]);
+        $markers['title'] = join('-', $tmp);
+        $doc              = $this->getDOMDocument($this->getFile($imageUrl));
+
+        $h5              = $doc->getElementsByTagName('h5');
+        $markers['user'] = $h5->item(0)->textContent;
+
+        $ulDoc   = $this->getDOMDocument($doc->saveHTML($doc->getElementsByTagName('ul')->item(2)));
+        $srcLink = $ulDoc->getElementsByTagName('a')->item(0);
+        $src     = $this->configuration['baseUrl'].$srcLink->getAttribute('href');
+
+
+
 
         $this->workFile = $this->replaceMarkers($this->configuration['fileNamePattern'],
             $markers);
@@ -101,13 +109,25 @@ class FreeImagesProvider extends AbstractProvider
      */
     protected function login()
     {
-        $this->post($this->configuration['loginUrl'],
+
+        // step 1: Get the CSRF token
+        $doc    = $this->getDOMDocument($this->getFile($this->configuration['loginUrl']));
+        $inputs = $doc->getElementsByTagName('input');
+        foreach ($inputs as $input) {
+            if ($input->getAttribute('name') == 'csrfmiddlewaretoken')
+                    $token = $input->getAttribute('value');
+        }
+
+
+        $res = $this->post('http://www.freeimages.com/signin',
             array(
-            'where' => '',
-            'f' => 'login',
-            'submit' => 'Sign in',
-            'login' => $this->configuration['login']['user'],
-            'pass' => $this->configuration['login']['password'],
+            'csrfmiddlewaretoken' => $token,
+            'username' => $this->configuration['login']['user'],
+            'password' => $this->configuration['login']['password'],
+            'captcha' => $this->data['captcha']['text'],
+            'uid' => $this->data['captcha']['hash'],
+            'remember' => 'true',
+            'next_url' => '/'
         ));
     }
 
@@ -151,5 +171,25 @@ class FreeImagesProvider extends AbstractProvider
                 $this->configuration['nameByTitle']['legalPattern']);
         }
         $this->workFile = pathinfo($src, PATHINFO_FILENAME);
+    }
+
+    /**
+     * Get a new captcha hash
+     * @return string Captcha Hash
+     */
+    public function getCaptchaHash()
+    {
+        $this->data['captcha']['hash'] = $this->getFile('http://www.freeimages.com/accounts/captcha/new?length=5&app=accounts&change=1');
+        return $this->data['captcha']['hash'];
+    }
+
+    /**
+     * Get a new captcha image
+     * @param string Hash
+     * @return string Captcha image url
+     */
+    public function getCaptchaImage($hash)
+    {
+        return 'http://www.freeimages.com/accounts/captcha/'.$hash;
     }
 }
