@@ -68,6 +68,23 @@ class AcquisitionController extends AbstractController
         $provider = \VMFDS\Cutter\Factories\ProviderFactory::getHostHandler($url);
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Using provider class '.get_class($provider));
 
+        // do we have to process a captcha?
+        if ($provider->hasCaptcha) {
+            \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Provider requires a captcha');
+            if (!$request->hasArgument('captchaHash')) {
+                \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('No captcha set yet, redirecting');
+                \VMFDS\Cutter\Core\Router::getInstance()->redirect(
+                    strtolower($this->getName()), 'captcha',
+                    array('url' => $url));
+            } else {
+                $provider->data['captcha'] = array(
+                    'hash' => $request->getArgument('captchaHash'),
+                    'text' => $request->getArgument('captchaText'),
+                );
+            }
+        }
+
+
         // render the view prematurely (waiting ...)
         $this->renderView();
 
@@ -87,6 +104,31 @@ class AcquisitionController extends AbstractController
         \VMFDS\Cutter\Core\Router::getInstance()->redirect(
             'ui', 'index', null, null,
             \VMFDS\Cutter\Core\Router::REDIRECT_JAVASCRIPT, 3000);
+    }
+
+    /**
+     * Captcha action
+     * Gets called to verify captcha information
+     * @action captcha
+     */
+    function captchaAction()
+    {
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('acquisition/import action called');
+        $request = \VMFDS\Cutter\Core\Request::getInstance();
+        if (!$request->hasArgument('url')) {
+            \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('No url specified, redirecting to upload');
+            $this->redirectToAction('form');
+        }
+        $url      = $request->getArgument('url');
+        $provider = \VMFDS\Cutter\Factories\ProviderFactory::getHostHandler($url);
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Using provider class '.get_class($provider));
+
+        $hash  = $provider->getCaptchaHash();
+        $image = $provider->getCaptchaImage($hash);
+
+        $this->view->assign('url', $url);
+        $this->view->assign('hash', $hash);
+        $this->view->assign('captcha', $image);
     }
 
     /**

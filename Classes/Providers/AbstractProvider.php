@@ -31,10 +31,12 @@ namespace VMFDS\Cutter\Providers;
 class AbstractProvider
 {
     static protected $handledHosts = array();
+    public $hasCaptcha             = 0;
     protected $configuration       = array();
     protected $curl;
     public $workFile               = '';
     public $legal                  = '';
+    public $data                   = array();
 
     /**
      * Checks if this provider can handle urls from a specific host
