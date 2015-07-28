@@ -57,7 +57,7 @@
                 </div>
 
                 <!-- This is the image we're attaching Jcrop to -->
-                <img src = "{{ image }}" id = "cropbox" />
+                <img src = "{{ image }}" id = "cropbox" width="{{ width }}" height="{{ height }}"/>
                 <div id="data-container"></div><br />
 
                 <form action = "cut.php" method = "post" onsubmit = "return checkCoords();">

@@ -113,10 +113,6 @@ $('document').ready(function(){
         loadTemplate($(this).data('template'));
     });
     
-    var oW = $('#cropbox').width();
-    var oH = $('#cropbox').height();
-    $('#cropbox').attr('width', oW);
-    $('#cropbox').attr('height', oH);
     
         
     cropper = $.Jcrop($('#cropbox'), {

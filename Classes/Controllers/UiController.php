@@ -52,6 +52,11 @@ class UiController extends AbstractController
 
         $this->view->assign('image',
             CUTTER_baseUrl.'Temp/Uploads/'.$session->getArgument('workFile'));
+
+        $imgInfo = getimagesize(CUTTER_baseUrl.'Temp/Uploads/'.$session->getArgument('workFile'));
+        $this->view->assign('width', $imgInfo[0]);
+        $this->view->assign('height', $imgInfo[1]);
+
         $this->view->assign('legal', $session->getArgument('legal'));
 
         $info = \VMFDS\Cutter\Factories\TemplateFactory::getTemplateInfo();
@@ -74,9 +79,23 @@ class UiController extends AbstractController
      */
     public function downloadAction()
     {
+        $this->dontShowView();
         $request = \VMFDS\Cutter\Core\Request::getInstance();
         if ($request->hasArgument('url')) {
-            $this->view->assign('url', $request->getArgument('url'));
+            $url = $request->getArgument('url');
+            $raw = CUTTER_basePath.'Temp/Processed/'.basename(parse_url($url,
+                        PHP_URL_PATH));
+            Header('Content-Description: File Transfer');
+            Header('Content-Disposition: attachment; filename='.sprintf('"%s"',
+                    addcslashes(basename($raw), '"')));
+            header('Content-Transfer-Encoding: binary');
+            header('Content-Type: application/octet-stream');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Pragma: public');
+            header('Content-Length: '.filesize($raw));
+            readfile($raw);
+            die();
         }
     }
 }
