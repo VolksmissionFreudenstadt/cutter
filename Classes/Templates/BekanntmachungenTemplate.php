@@ -30,11 +30,15 @@ namespace VMFDS\Cutter\Templates;
  */
 class BekanntmachungenTemplate extends AbstractTemplate
 {
-    protected $category  = 'Veranstaltungen';
-    protected $height    = 507;
-    protected $width     = 1024;
-    protected $processor = 'Event';
-    protected $suffix    = 'bkm';
-    protected $title     = 'Bekanntmachungen';
+    protected $category         = 'Veranstaltungen';
+    protected $height           = 507;
+    protected $width            = 1024;
+    protected $processor        = 'Event';
+    protected $suffix           = 'bkm';
+    protected $title            = 'Bekanntmachungen';
+    protected $processorOptions = array(
+        'event_field' => 'my_vmfds_events_announcement_image',
+        'event_image_path' => '',
+    );
 
 }

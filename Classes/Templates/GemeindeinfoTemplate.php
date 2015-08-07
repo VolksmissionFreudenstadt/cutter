@@ -30,11 +30,15 @@ namespace VMFDS\Cutter\Templates;
  */
 class GemeindeinfoTemplate extends AbstractTemplate
 {
-    protected $category  = 'Veranstaltungen';
-    protected $height    = 200;
-    protected $width     = 550;
-    protected $processor = 'Download';
-    protected $suffix    = 'ginfo';
-    protected $title     = 'Gemeindeinfo';
+    protected $category         = 'Veranstaltungen';
+    protected $height           = 200;
+    protected $width            = 550;
+    protected $processor        = 'Event';
+    protected $suffix           = 'ginfo';
+    protected $title            = 'Gemeindeinfo';
+    protected $processorOptions = array(
+        'event_field' => 'my_vmfds_events_gi_image',
+        'event_image_path' => '',
+    );
 
 }
