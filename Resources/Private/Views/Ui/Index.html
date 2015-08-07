@@ -55,6 +55,7 @@
                     <span id="customAR"><input type="text" size="4" id="myW" name="myW">x<input type="text" size="4" id="myH" name="myH"></span>
                     &nbsp;
                 </div>
+                <div id="results" role="alert"></div>
 
                 <!-- This is the image we're attaching Jcrop to -->
                 <img src = "{{ image }}" id = "cropbox" width="{{ width }}" height="{{ height }}"/>
@@ -72,7 +73,6 @@
                     </div>
                     <button id="btnCut" type="button" class="btn btn-success">Bild zuschneiden</button>
                     <button id="btnAbort" type="button" class="btn btn-danger">Zurück zum Upload</button>
-                    <div id="results" role="alert"></div>
                     <iframe id="resultsFrame" style="width: 1px; height: 1px; border: none;"></iframe>
                 </form>
             </div>
