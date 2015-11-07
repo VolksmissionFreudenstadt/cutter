@@ -21,6 +21,8 @@
  */
 
 var cropper;
+var origPictureHtml;
+var cropRestore;
 
 function updateCoords(c)
 {
@@ -35,23 +37,23 @@ function loadTemplate(key) {
     $.getJSON('{{ baseUrl  }}ajax/load/' + key, function (data) {
         // display info
         $('#stepTitle').html(data.title);
-        $('#stepIcon span').attr('class', 'glyphicon glyphicon-'+data.icon);
-        $('#measurements').html(data.w+' x '+data.h);
+        $('#stepIcon span').attr('class', 'glyphicon glyphicon-' + data.icon);
+        $('#measurements').html(data.w + ' x ' + data.h);
 
         // additional options
         $.getJSON('{{ baseUrl  }}ajax/options/' + key, function (opts) {
             console.log(opts);
-            
+
             var form = '';
             var i;
-            for (i=0; i<opts.length; i++) {
+            for (i = 0; i < opts.length; i++) {
                 form = form + '<div class="form-group">'
-                form = form + '<label for="' + opts[i]['key']+'">'+opts[i]['label'] + '</label> '
+                form = form + '<label for="' + opts[i]['key'] + '">' + opts[i]['label'] + '</label> '
                         + opts[i]['form'];
                 form = form + '</div>'
             }
             $('#arguments').html(form);
-            for (i=0; i<opts.length; i++) {
+            for (i = 0; i < opts.length; i++) {
                 $('#' + opts[i]['key']).addClass('additionalArgument');
             }
         });
@@ -60,19 +62,25 @@ function loadTemplate(key) {
         $('#results').html('');
         $('#results').attr('class', '');
 
-        
+
         // store current template key
         $('#data-container').data('key', key);
-        
+
         // reset cropper
         cropper.release();
         cropper.setOptions({
             aspectRatio: data.w / data.h
-        });        
+        });
     });
 }
 
 function doCut() {
+    var color = $('#textcolor').val();
+    if (color == '')
+        color = 'ffffff';
+    else
+        color = color.substring(1, 7);
+
     var uri = '{{ baseUrl }}cut/do';
     uri = uri + '?x=' + $('#x').val();
     uri = uri + '&y=' + $('#y').val();
@@ -80,9 +88,11 @@ function doCut() {
     uri = uri + '&h=' + $('#h').val();
     uri = uri + '&legal=' + $('#legal').val();
     uri = uri + '&template=' + $('#data-container').data('key');
-    $('.additionalArgument').each(function(){
+    uri = uri + '&color=' + color;
+    $('.additionalArgument').each(function () {
         uri = uri + '&' + $(this).attr('id') + '=' + $(this).val();
     });
+    console.log('Calling CUT action via AJAX at ' + uri);
     $.getJSON(uri, function (data) {
         console.log('Received result package:');
         console.log(data);
@@ -93,28 +103,29 @@ function doCut() {
             // force a download, if necessary
             if (data['forceDownload']) {
                 $('#resultsFrame').attr('src', '{{ baseUrl }}ui/download?url=' + data['forceDownload']);
-            }            
+            }
             // fade out results message
-            $('#results').fadeOut( 5000, function() {
+            $('#results').fadeOut(5000, function () {
                 $('#results').hide();
             });
         } else {
             $('#results').attr('class', 'alert alert-danger');
-            $('#results').html('Leider ging beim Zuschneiden etwas schief.');            
+            $('#results').html('Leider ging beim Zuschneiden etwas schief.');
         }
-        
-        
+
+
     });
 }
 
 
-$('document').ready(function(){
-    $('.templateSelector').click(function(){
+$('document').ready(function () {
+    $('.templateSelector').click(function () {
         loadTemplate($(this).data('template'));
     });
-    
-    
-        
+
+
+    origPictureHtml = $('#cropdiv').html();
+
     cropper = $.Jcrop($('#cropbox'), {
         aspectRatio: 1 / 1,
         onSelect: updateCoords,
@@ -124,13 +135,47 @@ $('document').ready(function(){
     $('#customAR').hide();
     $('#measurements').show();
     $('#results').hide();
-    
-    $('#btnAbort').click(function(){
+
+    $('#btnAbort').click(function () {
         window.location.href = '{{ baseUrl }}acquisition/form';
     });
 
-    $('#btnCut').click(function(){
+    $('#btnCut').click(function () {
         doCut();
     });
+
+
+    $('.colorpick').colorpicker();
+
+    $('#btnEyeDropper').click(function () {
+        var w = $('#cropbox').width();
+        var h = $('#cropbox').height();
+        cropRestore = {
+            select: cropper.tellSelect(),
+            selectScaled: cropper.tellScaled(),
+            options: cropper.getOptions()
+        };
+        $('#cropdiv').html(origPictureHtml);
+        $('#cropbox').attr('width', w);
+        $('#cropbox').attr('height', h);
+        //$('#cropbox').height(h);
+
+        $('#cropbox').dropper({
+            clickCallback: function (color) {
+                $('#textcolor').val('#' + color.rgbhex);
+                // restore cropper
+                $('#cropdiv').html(origPictureHtml);
+                cropper = $.Jcrop($('#cropbox'), cropRestore.options);
+                cropper.setSelect(
+                        [
+                            cropRestore.select.x,
+                            cropRestore.select.y,
+                            cropRestore.select.x2,
+                            cropRestore.select.y2
+                        ]);
+            }
+        });
+    });
+
 });
 

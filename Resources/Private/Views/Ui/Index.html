@@ -8,9 +8,12 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
         <link rel="stylesheet" href="{{ baseUrl }}Resources/Public/css/jquery.Jcrop.css" type="text/css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.3.0/css/bootstrap-colorpicker.min.css" type="text/css" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.3.0/js/bootstrap-colorpicker.min.js"></script>
         <script src="{{ baseUrl }}Resources/Public/js/jquery.Jcrop.js"></script>
+        <script src="{{ baseUrl }}Resources/Public/js/jquery.dropper.js"></script>
         <script src="{{ baseUrl }}Resources/Public/js/holder/holder.js"></script>
         <script src="{{ baseUrl }}js/ui.js"></script>
 
@@ -32,11 +35,11 @@
                                 {% for template in templateGroup %}
                                 <a href="#" class="list-group-item templateSelector" 
                                    data-template="{{ template.key }}">
-                                        <span class="glyphicon glyphicon-{{ template.icon }}"></span>&nbsp;                                       
-                                       {{ template.title }}
-                                       <span class="badge">
-                                       {{template.w}} x {{template.h}}
-                                       </span>
+                                    <span class="glyphicon glyphicon-{{ template.icon }}"></span>&nbsp;                                       
+                                    {{ template.title }}
+                                    <span class="badge">
+                                        {{template.w}} x {{template.h}}
+                                    </span>
                                 </a>
                                 {% endfor %}
                             </div>                           
@@ -58,7 +61,9 @@
                 <div id="results" role="alert"></div>
 
                 <!-- This is the image we're attaching Jcrop to -->
-                <img src = "{{ image }}" id = "cropbox" width="{{ width }}" height="{{ height }}"/>
+                <div id="cropdiv">
+                    <img src = "{{ image }}" id = "cropbox" width="{{ width }}" height="{{ height }}"/>
+                </div>
                 <div id="data-container"></div><br />
 
                 <form action = "cut.php" method = "post" onsubmit = "return checkCoords();">
@@ -71,9 +76,22 @@
                         <label for="legal">Quellenangaben zum Bild:</label>
                         <input type="text" id="legal" name="legal" value="{{ legal }}" class="form-control" />
                     </div>
-                    <button id="btnCut" type="button" class="btn btn-success">Bild zuschneiden</button>
-                    <button id="btnAbort" type="button" class="btn btn-danger">Zurück zum Upload</button>
                     <iframe id="resultsFrame" style="width: 1px; height: 1px; border: none;"></iframe>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <button id="btnCut" type="button" class="btn btn-success">Bild zuschneiden</button>
+                            <button id="btnAbort" type="button" class="btn btn-danger">Zurück zum Upload</button>                            
+                        </div>
+                        <div class="col-sm-2">
+                            <button id="btnEyeDropper" type="button" class="btn btn-default"><span class="glyphicon glyphicon-search"> </span> Farbwähler</button>                            
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="input-group colorpick" width="200">
+                                <input type="text" id="textcolor" name="textcolor" value="#ffffff" class="form-control" />
+                                <span class="input-group-addon"><i></i></span>
+                            </div>                            
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>

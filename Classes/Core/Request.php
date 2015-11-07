@@ -164,4 +164,14 @@ class Request
         }
         return $data;
     }
+
+    public function requireArguments($args)
+    {
+        foreach ($args as $arg) {
+            if (!$this->hasArgument($arg)) {
+                \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('FATAL: Missing argument \''.$arg.'\'');
+                die('FATAL: Missing argument \''.$arg.'\'');
+            }
+        }
+    }
 }

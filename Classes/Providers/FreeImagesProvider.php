@@ -69,28 +69,40 @@ class FreeImagesProvider extends AbstractProvider
      */
     public function retrieveImage($imageUrl)
     {
-        // Deal with urls like http://www.freeimages.com/photo/dices-4-1169521
+        $session = \VMFDS\Cutter\Core\Session::getInstance();
 
         $this->login();
-        //$src = $this->getSourceUrl($doc);
-        // extract info from document title
+        $pDoc = \PhpQuery::newDocumentHTML($this->getFile($imageUrl));
+
+
+        $meta['url']   = $imageUrl;
+        $meta['title'] = $pDoc->find('h1 strong')->text();
+        $tags          = $pDoc->find('.ui-tags li');
+        foreach ($tags as $tag) {
+            $meta['keywords'][] = $tag->textContent;
+        }
+        $meta['description'] = $pDoc->find('.detail-info-tags p')->text();
+        $meta['author']      = $markers['user']     = $pDoc->find('#photographer-name')->text();
+        $meta['license']     = 'Freeimages.com Content License, http://www.freeimages.com/license';
+
+
+        $links = $pDoc->find('.img-btns li a');
+        foreach ($links as $link) {
+            $meta['src'][] = $this->configuration['baseUrl'].$link->getAttribute('href');
+        }
+
+
         $path             = str_replace('/photo/', '',
             parse_url($imageUrl, PHP_URL_PATH));
         $tmp              = explode('-', $path);
-        $markers['id']    = $tmp[count($tmp) - 1];
+        $markers['id']    = $meta['id']       = $tmp[count($tmp) - 1];
         unset($tmp[count($tmp) - 1]);
         $markers['title'] = join('-', $tmp);
-        $doc              = $this->getDOMDocument($this->getFile($imageUrl));
 
-        $h5              = $doc->getElementsByTagName('h5');
-        $markers['user'] = $h5->item(0)->textContent;
+        // set meta data for IPTC tagging
+        $session->setArgument('meta', $meta);
 
-        $ulDoc   = $this->getDOMDocument($doc->saveHTML($doc->getElementsByTagName('ul')->item(2)));
-        $srcLink = $ulDoc->getElementsByTagName('a')->item(0);
-        $src     = $this->configuration['baseUrl'].$srcLink->getAttribute('href');
-
-
-
+        $src = $meta['src'][0];
 
         $this->workFile = $this->replaceMarkers($this->configuration['fileNamePattern'],
             $markers);

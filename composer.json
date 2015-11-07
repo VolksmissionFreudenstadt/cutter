@@ -1,6 +1,6 @@
 {
     "name": "vmfds/cutter",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "Versatile image cutter and processor",
     "license": "GPL-3.0+",
     "type": "project",
@@ -12,7 +12,8 @@
     ],
     "require": {
         "twig/twig": "~1.0",
-        "monolog/monolog": "~1.13.1"
+        "monolog/monolog": "~1.13.1",
+        "electrolinux/phpquery": "*"
     },
     "autoload": {
         "psr-4": {

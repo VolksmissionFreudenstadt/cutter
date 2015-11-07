@@ -21,34 +21,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace VMFDS\Cutter\Converters;
+namespace VMFDS\Cutter\Core;
 
 /**
- * Description of JpegConverter
+ * Description of GarbageCollector
  *
  * @author chris
  */
-class JpegConverter extends AbstractConverter
+class GarbageCollector
 {
 
     /**
-     * Checks if this converter can handle a given image
-     * @param \string $imageFile Image file name
-     * @return boolean True if image can be handled
+     * Clean a folder
+     * @param string $folder Folder path
+     * @param string $age Maximum age for files (e.g. '5 minutes')
      */
-    static function canHandleImage($imageFile)
+    public static function clean($folder, $age)
     {
-        return (self::getMimeType($imageFile) == 'image/jpeg');
-    }
-
-    /**
-     * Create image resource from jpeg file
-     *
-     * @param string $imageFile Path to the image file
-     * @return image
-     */
-    public function getImage($imageFile)
-    {
-        return imagecreatefromjpeg($imageFile);
+        $oldestPermitted = strtotime('-'.$age);
+        $handle          = opendir($folder);
+        while (false !== ($entry           = readdir($handle))) {
+            if (($entry !== '.') && ($entry !== '..')) {
+                $fileAge = filemtime($folder.$entry);
+                if ($fileAge < $oldestPermitted) {
+                    \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Garbage collector cleaning '.$folder.$entry);
+                    unlink($folder.$entry);
+                }
+            }
+        }
     }
 }

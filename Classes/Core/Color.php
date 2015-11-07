@@ -21,34 +21,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace VMFDS\Cutter\Converters;
+namespace VMFDS\Cutter\Core;
 
-/**
- * Description of JpegConverter
- *
- * @author chris
- */
-class JpegConverter extends AbstractConverter
+class Color
 {
+    public $R = 255;
+    public $G = 255;
+    public $B = 255;
 
     /**
-     * Checks if this converter can handle a given image
-     * @param \string $imageFile Image file name
-     * @return boolean True if image can be handled
+     * Create instance of color object from hex string
+     * @param string $hex Hex string (e.g. ffffff, i.e. without leading #)
      */
-    static function canHandleImage($imageFile)
+    function __construct($hex)
     {
-        return (self::getMimeType($imageFile) == 'image/jpeg');
-    }
-
-    /**
-     * Create image resource from jpeg file
-     *
-     * @param string $imageFile Path to the image file
-     * @return image
-     */
-    public function getImage($imageFile)
-    {
-        return imagecreatefromjpeg($imageFile);
+        $this->R = hexdec(substr($hex, 0, 2));
+        $this->G = hexdec(substr($hex, 2, 2));
+        $this->B = hexdec(substr($hex, 4, 2));
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Parsed color: '.print_r($this,
+                1));
     }
 }

@@ -23,6 +23,8 @@
 
 namespace VMFDS\Cutter\Providers;
 
+require_once(CUTTER_basePath.'vendor/electrolinux/phpquery/phpQuery/phpQuery.php');
+
 /**
  * Description of AbstractProvider
  *

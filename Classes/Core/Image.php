@@ -50,31 +50,32 @@ class Image
         imagejpeg($this->image, $destinationFile, $quality);
     }
 
-    public function setLegalText($legal, $w, $h)
+    /**
+     * Print the legal text on the picture
+     * @param string $legalText Legal text
+     * @param int $w Picture width
+     * @param int $h Picture height
+     * @param \VMFDS\Cutter\Core\Color $color Color object
+     */
+    public function setLegalText($legalText, $w, $h, $color)
     {
-        //$legalText = ($localConfig['legal']['prefix'] ? $localConfig['legal']['prefix'].' '
-        //            : '').$legal;
-        $legalText     = $legal;
-        $maxPercentage = 20;
-        $minHeight     = 100;
-        $font          = CUTTER_basePath.'Assets/Fonts/opensans.ttf';
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('setLegalText()');
 
-        // calculate proper size
-        $perc         = 0;
-        $size         = 0;
-        $height       = 0;
-        $tgtMinHeight = $h * ($maxPercentage / 100);
-        if ($tgtMinHeight < $minHeight) {
-            $tgtMinHeight = $minHeight;
-        }
+        $minHeight = 15;
+        $font      = CUTTER_basePath.'Assets/Fonts/opensans.ttf';
 
-        while ($height < $tgtMinHeight) {
+        $size   = 0;
+        $height = 0;
+
+        while (($height < $minHeight) && ($size < 100)) {
             $size++;
 
             // calculate bounding box
             $box    = imagettfbbox($size, 0, $font, $legalText);
-            $height = $box[2] - $box[0];
-            //$perc = $height / ($localConfig['h'] / 100);
+            $height = abs($box[7] - $box[1]);
+            \VMFDS\Cutter\Core\Logger::getLogger()->addDebug(print_r(array('size' => $size,
+                'height' => $height, 'bbox' => $box,
+                    ), 1));
         }
         $size--;
         $box = imagettfbbox($size, 0, $font, $legalText);
@@ -84,9 +85,25 @@ class Image
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug(
             'Legal font file is '.$font);
 
-        // insert source:
-        $white = imagecolorallocate($this->image, 255, 255, 255);
-        imagettftext($this->image, $size, 90, $x, $h - 5, $white, $font,
+        // get color
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug(
+            'Text color: '.print_r($color, 1));
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug(
+            'Palette usage for this image: '.imagecolorstotal($this->image));
+        $imgColor = imagecolorexact($this->image, $color->R, $color->G,
+            $color->B);
+        if ($imgColor == -1) {
+            $imgColor = imagecolorallocate($this->image, $color->R, $color->G,
+                $color->B);
+        }
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug(
+            'Palette index for this color: '.$imgColor);
+
+
+// insert source:
+        imagettftext($this->image, $size, 90, $x, $h - 5, $imgColor, $font,
             $legalText);
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug(
+            'Done inserting legal text.');
     }
 }

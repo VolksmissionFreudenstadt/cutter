@@ -64,6 +64,8 @@ class AcquisitionController extends AbstractController
             $this->redirectToAction('form');
         }
         $url      = $request->getArgument('url');
+        $session  = \VMFDS\Cutter\Core\Session::getInstance()->setArgument('original_url',
+            $url);
         \VMFDS\Cutter\Core\Logger::getLogger()->addNotice('Starting cloud import from url '.$url);
         $provider = \VMFDS\Cutter\Factories\ProviderFactory::getHostHandler($url);
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Using provider class '.get_class($provider));
@@ -89,7 +91,7 @@ class AcquisitionController extends AbstractController
         $this->renderView();
 
         $provider->retrieveImage($url);
-        print_r($provider);
+        if (CUTTER_debug) print_r($provider);
 
         // save data in session and redirect to index
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Import done, saving to session.');

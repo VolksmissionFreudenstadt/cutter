@@ -24,7 +24,11 @@
 require_once('vendor/autoload.php');
 
 // define some constants
-define('CUTTER_debug', true);
+define('CUTTER_version', '2.0.1');
+define('CUTTER_software', 'VMFDS CUTTER '.CUTTER_version);
+
+
+define('CUTTER_debug', false);
 define('CUTTER_basePath', __DIR__.'/');
 define('CUTTER_uploadPath', CUTTER_basePath.'Temp/Uploads/');
 define('CUTTER_viewPath', CUTTER_basePath.'Resources/Private/Views/');
@@ -40,6 +44,12 @@ if (CUTTER_debug) {
 
 // logging
 \VMFDS\Cutter\Core\Logger::initialize();
+
+// do garbage collection
+\VMFDS\Cutter\Core\GarbageCollector::clean(CUTTER_basePath.'Temp/Processed/',
+    '2 days');
+\VMFDS\Cutter\Core\GarbageCollector::clean(CUTTER_basePath.'Temp/Uploads/',
+    '2 days');
 
 // start session handling
 \VMFDS\Cutter\Core\Session::initialize();

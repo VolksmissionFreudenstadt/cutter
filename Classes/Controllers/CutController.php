@@ -53,15 +53,13 @@ class CutController extends AbstractController
      */
     function doAction()
     {
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('do Action');
         $session = \VMFDS\Cutter\Core\Session::getInstance();
         $request = \VMFDS\Cutter\Core\Request::getInstance();
         // we just die, since this is a headless controller
         if (!$session->hasArgument('workFile')) die('workfile');
-        if (!$request->hasArgument('x')) die('x');
-        if (!$request->hasArgument('y')) die('y');
-        if (!$request->hasArgument('w')) die('w');
-        if (!$request->hasArgument('h')) die('h');
-        if (!$request->hasArgument('template')) die('template');
+        $request->requireArguments(array('x', 'y', 'w', 'h', 'template', 'color'));
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('All necessary arguments are present.');
 
         $template  = \VMFDS\Cutter\Factories\TemplateFactory::get($request->getArgument('template'));
         $processor = $template->getProcessorObject();
@@ -75,7 +73,12 @@ class CutController extends AbstractController
         $imageFile = CUTTER_uploadPath.$session->getArgument('workFile');
         $converter = \VMFDS\Cutter\Factories\ConverterFactory::getFileHandler($imageFile);
 
+        $colorString = $request->getArgument('color');
+        $color       = new \VMFDS\Cutter\Core\Color($colorString);
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Color hex string: '.$request->getArgument('color'));
+
         // process image
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Start image processing.');
         $image = new \VMFDS\Cutter\Core\Image($converter->getImage($imageFile));
         $image->resize($request->getArgument('x'), $request->getArgument('y'),
             $template->getWidth(), $template->getHeight(),
@@ -83,11 +86,55 @@ class CutController extends AbstractController
         if ($request->hasArgument('legal')) {
             $legal = $request->getArgument('legal');
             \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Legal text is "'.$legal.'"');
-            $image->setLegalText($legal, $template->getWidth(),
-                $template->getHeight());
+            $image->setLegalText('Bild: '.$legal, $template->getWidth(),
+                $template->getHeight(), $color);
         }
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug(
+            'Creating JPEG image...');
         $image->toJpeg($destinationFile, 100);
 
+        // Embed IPTC data
+        $session = \VMFDS\Cutter\Core\Session::getInstance();
+        $meta    = $session->getArgument('meta');
+        $i       = new \VMFDS\Cutter\Core\IPTC($destinationFile);
+        $i->set(IPTC_BYLINE, $meta['author']);
+        $i->set(IPTC_COPYRIGHT_STRING, $legal.', '.$meta['url']);
+        $i->set(IPTC_ORIGINATING_PROGRAM, 'CUTTER by Volksmission Freudenstadt');
+        $i->set(IPTC_PROGRAM_VERSION, CUTTER_version);
+        $i->set(IPTC_SOURCE, $session->getArgument('original_url'));
+        $i->set(IPTC_REFERENCE_NUMBER, $session->getArgument($meta['id']));
+        if ($meta['license']) {
+            $i->set(IPTC_SPECIAL_INSTRUCTIONS, 'Lizenz: '.$meta['license']);
+        }
+        $i->set(IPTC_CAPTION, $meta['title']);
+        $i->set(IPTC_HEADLINE, $meta['title']);
+        $i->set(IPTC_LOCAL_CAPTION, $meta['title']);
+        $i->set(IPTC_KEYWORDS, join(', ', $meta['keywords']));
+        $i->set(IPTC_SOURCE, $meta['url']);
+        $i->write();
+
+        // Set EXIF comment
+        $commentFile = CUTTER_basePath.'Temp/'.pathinfo($session->getArgument('workFile'),
+                PATHINFO_FILENAME)
+            .'_'.$template->getSuffix().'.txt';
+        $fp          = fopen($commentFile, 'w');
+        fwrite($fp,
+            'Original url: '.$meta['url']."\r\n"
+            .'Copyright: '.$legal."\r\n"
+            .'Downloaded: '.strftime('%d.%m.%Y, %H:%M:%S')."\r\n"
+            .'Cut template: '.$template->getKey().' ('.$template->getWidth().'x'.$template->getHeight().")\r\n"
+            .'Cut area: '.$request->getArgument('x').', '.$request->getArgument('x').', '.$request->getArgument('w').', '.$request->getArgument('h')."\r\n"
+            .'Text color: #'.$request->getArgument('color')."\r\n"
+            .'CUTTER '.CUTTER_version);
+        fclose($fp);
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Adding EXIF comment');
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('External command: '.'jhead -ci '.$commentFile.' '.$destinationFile);
+        exec('jhead -ci '.$commentFile.' '.$destinationFile);
+        unlink($commentFile);
+
+        // Processor: What do we do with the finished file?
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug(
+            'Calling final file processor...');
         $this->data = $this->callProcessor($processor, $destinationFile);
     }
 
@@ -101,8 +148,12 @@ class CutController extends AbstractController
     private function callProcessor($processor, $file)
     {
         $request    = \VMFDS\Cutter\Core\Request::getInstance();
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Calling file processor '.print_r($processor,
+                1));
         $results    = $processor->process($file,
             $request->getArgumentsArray($processor->requiresArguments()));
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Processor results '.print_r($results,
+                1));
         $this->data = $results;
 
         // Fallback to another processor?
