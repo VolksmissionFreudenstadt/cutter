@@ -3,7 +3,11 @@
 /Temp/Cache/*
 /Temp/Uploads/*
 /Temp/Processed/*
-/Configuration/Connectors/Kool.yaml
-/Configuration/Connectors/Sermon.yaml
+/Configuration/*/*.yaml
+!/Configuration/*/*.sample.yaml
 /Logs/*
 /Assets/*
+/Logs/
+/.project
+/composer.lock
+/.gitignore

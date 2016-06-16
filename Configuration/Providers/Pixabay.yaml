@@ -1,0 +1,5 @@
+login:
+  user: potofcoffee
+  password: vYXNXghisN7oshgHxm1Y
+fileNamePattern: 'pixabay_###USER###_###ID###__###TITLE###'
+legalPattern: 'pixabay / ###USER###'

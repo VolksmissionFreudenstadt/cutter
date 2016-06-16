@@ -32,7 +32,7 @@ function getLegalText() {
 $(document).ready(function () {
 
     $("#fileuploader").uploadFile({
-        url: '{{ baseUrl }}acquisition/receive',
+        url: '?action=receive',
         filename: 'upload',
         downloadStr: 'Hochladen',
         cancelStr: 'Abbrechen',
@@ -46,14 +46,18 @@ $(document).ready(function () {
         onSubmit: function (files)
         {
             $('#legal').val(getLegalText());
+            $("#eventsmessage").html($("#eventsmessage").html() + "<br/>Submitting:" + JSON.stringify(files));
         },
         onSuccess: function (files, data, xhr)
         {
-            window.location.href = '{{ baseUrl }}ui/index';
+            $("#eventsmessage").html($("#eventsmessage").html() + "<br/>Success for: " + data);
+            window.location.href = '?action=index';
 
         },
         afterUploadAll: function ()
         {
+            $("#eventsmessage").html($("#eventsmessage").html() + "<br/>All files are uploaded");
+            //$('#fileupload').submit();
 
         },
         onError: function (files, status, errMsg)
@@ -66,15 +70,9 @@ $(document).ready(function () {
 
 
     $('#crossloadSubmit').click(function () {
-        window.location.href = '{{ baseUrl }}acquisition/import/?url=' + encodeURIComponent($('#url').val());
+        //alert('Hi');
+        window.location.href = '?action=import&url=' + encodeURIComponent($('#url').val());
     });
-
-    // Handle pressing "Enter" on the input field
-    function crossloadFormSubmit() {
-        alert('Hi');
-        window.location.href = '{{ baseUrl }}acquisition/import/?url=' + encodeURIComponent($('#url').val());
-    };
-
 
     $('li.providerOption a').click(function () {
         var v = $(this).html();

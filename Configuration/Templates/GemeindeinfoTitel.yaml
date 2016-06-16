@@ -1,0 +1,4 @@
+processor:
+  move_to: /home/vmfredbb/intranet/gemeindeinfo/Temp/TitleImage/
+  forceFileName: titel.jpg
+  
