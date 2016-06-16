@@ -105,7 +105,7 @@ class Typo3Processor extends AbstractProcessor
             $fileId = $this->db->storeFile(
                     $this->configuration['relative_base'] . $destFile, $this->configuration['move_to'] . $destFile, $options['page'], $this->configuration['storage']
             );
-            $this->db->createFileReference($fileId, $this->configuration['pid'], $this->configuration['cruser_id'], 'pages', 'media', $options['page'], '', $request->getArgument('legal'));
+            $this->db->createFileReference($fileId, $options['page'], $this->configuration['cruser_id'], 'pages', 'media', $options['page'], '', $request->getArgument('legal'));
             $res = array('result' => self::RESULT_OK);
             return $res;
         }
