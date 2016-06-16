@@ -90,4 +90,13 @@ class AbstractConnector
         }
         return $row;
     }
+
+    /**
+     * Get id of last inserted record
+     * 
+     * @return mixed Insert id or false
+     */
+    protected function getInsertId() {
+        return $this->db->insert_id;
+    }
 }
