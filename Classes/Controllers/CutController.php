@@ -109,7 +109,7 @@ class CutController extends AbstractController
         $i->set(IPTC_CAPTION, $meta['title']);
         $i->set(IPTC_HEADLINE, $meta['title']);
         $i->set(IPTC_LOCAL_CAPTION, $meta['title']);
-        $i->set(IPTC_KEYWORDS, join(', ', $meta['keywords']));
+        $i->set(IPTC_KEYWORDS, (is_array($meta['keywords']) ? join(', ', $meta['keywords']) : $meta['keywords']));
         $i->set(IPTC_SOURCE, $meta['url']);
         $i->write();
 
