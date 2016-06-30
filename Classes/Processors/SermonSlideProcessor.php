@@ -41,7 +41,7 @@ class SermonSlideProcessor extends AbstractProcessor
         parent::__construct();
         $confManager = \VMFDS\Cutter\Core\ConfigurationManager::getInstance();
         $this->configuration = $confManager->getConfigurationSet('sermonSlide', 'Processors');
-        $this->sermonDB = new \VMFDS\Cutter\Connectors\SermonConnector();
+        $this->sermonDB = new \VMFDS\Cutter\Connectors\Typo3Connector();
     }
 
     public function getAdditionalFields()

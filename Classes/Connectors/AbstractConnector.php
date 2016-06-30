@@ -96,7 +96,7 @@ class AbstractConnector
      * 
      * @return mixed Insert id or false
      */
-    protected function getInsertId() {
+    public function getInsertId() {
         return $this->db->insert_id;
     }
 }
