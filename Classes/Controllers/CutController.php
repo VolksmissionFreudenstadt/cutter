@@ -88,7 +88,7 @@ class CutController extends AbstractController
             \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Legal text is "'.$legal.'"');
             $image->setLegalText('Bild: '.$legal, $template->getWidth(),
                 $template->getHeight(), $color);
-        }
+        } else $legal='';
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug(
             'Creating JPEG image...');
         $image->toJpeg($destinationFile, 100);

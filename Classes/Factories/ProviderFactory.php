@@ -23,6 +23,8 @@
 
 namespace VMFDS\Cutter\Factories;
 
+use VMFDS\Cutter\Providers\DefaultFetchFromUrlProvider;
+
 /**
  * Description of ProviderFactory
  *
@@ -62,8 +64,10 @@ class ProviderFactory extends AbstractFactory
                 if (!$found) $found = new $class();
             }
         }
-        if (!$found)
-                throw new \Exception('No provider found for host "'.$host.'"');
+        if (!$found) {
+            //throw new \Exception('No provider found for host "'.$host.'"');
+            $found = new DefaultFetchFromUrlProvider();
+        }
         return $found;
     }
 }
