@@ -66,6 +66,10 @@ class AbstractTemplate
     public function __construct()
     {
         $this->configuration['key'] = $this->getKey();
+        $confMan = \VMFDS\Cutter\Core\ConfigurationManager::getInstance();
+        $localConfig = $confMan->getConfigurationSet($this->getKey(), 'Templates');
+        if (isset($localConfig['processor']))
+            $this->processorOptions = $confMan->setDefaults($localConfig['processor'], ['defaults' => $this->processorOptions]);
     }
 
     public function getProcessorObject()

@@ -39,7 +39,7 @@ class EventProcessor extends AbstractProcessor
         parent::__construct();
         $confManager         = \VMFDS\Cutter\Core\ConfigurationManager::getInstance();
         $this->configuration = $confManager->getConfigurationSet('event',
-            'Processors');
+            'processors');
         $this->kool          = new \VMFDS\Cutter\Connectors\koolConnector();
     }
 

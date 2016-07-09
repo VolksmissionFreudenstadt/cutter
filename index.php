@@ -28,7 +28,7 @@ define('CUTTER_version', '2.0.1');
 define('CUTTER_software', 'VMFDS CUTTER '.CUTTER_version);
 
 
-define('CUTTER_debug', false);
+define('CUTTER_debug', true);
 define('CUTTER_basePath', __DIR__.'/');
 define('CUTTER_uploadPath', CUTTER_basePath.'Temp/Uploads/');
 define('CUTTER_viewPath', CUTTER_basePath.'Resources/Private/Views/');

@@ -53,7 +53,7 @@ class AbstractProcessor
     {
         $class = get_class($this);
         return str_replace('Processor', '',
-            str_replace('VMFDS\\Cutter\\Processors\\', '', $class));
+            str_replace('VMFDS\\Cutter\\processors\\', '', $class));
     }
 
     function __construct()

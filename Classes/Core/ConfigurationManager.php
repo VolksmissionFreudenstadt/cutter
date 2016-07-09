@@ -78,10 +78,10 @@ class ConfigurationManager
      * @param array c Array with default values
      * @return array New array with default values set
      */
-    function setDefaults($lc, $c)
+    function setDefaults($existingConfiguration, $defaultConfiguration)
     {
-        $lc = $this->arrayMergeRecursiveDistinct($c['defaults'], $lc);
-        return $lc;
+        $existingConfiguration = $this->arrayMergeRecursiveDistinct($defaultConfiguration['defaults'], $existingConfiguration);
+        return $existingConfiguration;
     }
 
     /**

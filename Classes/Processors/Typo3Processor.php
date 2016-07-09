@@ -35,7 +35,7 @@ class Typo3Processor extends AbstractProcessor
     {
         parent::__construct();
         $confManager = \VMFDS\Cutter\Core\ConfigurationManager::getInstance();
-        $this->configuration = $confManager->getConfigurationSet('typo3', 'Processors');
+        $this->configuration = $confManager->getConfigurationSet('typo3', 'processors');
         $this->db = new \VMFDS\Cutter\Connectors\Typo3Connector();
     }
 

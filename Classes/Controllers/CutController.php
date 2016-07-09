@@ -61,7 +61,9 @@ class CutController extends AbstractController
         $request->requireArguments(array('x', 'y', 'w', 'h', 'template', 'color'));
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('All necessary arguments are present.');
 
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Loading template '.$request->getArgument('template'));
         $template  = \VMFDS\Cutter\Factories\TemplateFactory::get($request->getArgument('template'));
+        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Loading processor '.$template->getProcessor());
         $processor = $template->getProcessorObject();
         $processor->setOptionsArray($template->getProcessorOptions());
 

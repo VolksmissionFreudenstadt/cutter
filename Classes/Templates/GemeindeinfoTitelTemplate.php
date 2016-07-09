@@ -33,7 +33,7 @@ class GemeindeinfoTitelTemplate extends AbstractTemplate
     protected $category  = 'Publikationen';
     protected $height    = 679;
     protected $width     = 1024;
-    protected $processor = 'Download';
+    protected $processor = 'save';
     protected $suffix    = 'gititle';
     protected $title     = 'Gemeindeinfo: Titelseite';
 
