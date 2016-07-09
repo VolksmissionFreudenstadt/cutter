@@ -23,6 +23,7 @@
 var cropper;
 var origPictureHtml;
 var cropRestore;
+var currentAspectRatio = 0;
 
 function updateCoords(c)
 {
@@ -67,10 +68,14 @@ function loadTemplate(key) {
         $('#data-container').data('key', key);
 
         // reset cropper
-        cropper.release();
-        cropper.setOptions({
-            aspectRatio: data.w / data.h
-        });
+        var newAspectRatio = data.w / data.h;
+        if (currentAspectRatio !== newAspectRatio) {
+            cropper.release();
+            cropper.setOptions({
+                aspectRatio: newAspectRatio
+            });
+            currentAspectRatio = newAspectRatio;
+        }
     });
 }
 
