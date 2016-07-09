@@ -24,6 +24,7 @@ var cropper;
 var origPictureHtml;
 var cropRestore;
 var currentAspectRatio = 0;
+var baseUrl = '{{ baseUrl}}';
 
 function updateCoords(c)
 {
@@ -48,10 +49,14 @@ function loadTemplate(key) {
             var form = '';
             var i;
             for (i = 0; i < opts.length; i++) {
-                form = form + '<div class="form-group">'
-                form = form + '<label for="' + opts[i]['key'] + '">' + opts[i]['label'] + '</label> '
+                if (opts[i]['label']) {
+                    form = form + '<div class="form-group">'
+                    form = form + '<label for="' + opts[i]['key'] + '">' + opts[i]['label'] + '</label> '
                         + opts[i]['form'];
-                form = form + '</div>'
+                    form = form + '</div>'
+                } else {
+                    form = form + opts[i]['form'];
+                }
             }
             $('#arguments').html(form);
             for (i = 0; i < opts.length; i++) {
@@ -113,6 +118,10 @@ function doCut() {
             $('#results').fadeOut(5000, function () {
                 $('#results').hide();
             });
+            // reload template (take care of updated data)
+            if (typeof updateArgumentsAfterCut === "function") {
+                updateArgumentsAfterCut(data);
+            }
         } else {
             $('#results').attr('class', 'alert alert-danger');
             $('#results').html('Leider ging beim Zuschneiden etwas schief.');

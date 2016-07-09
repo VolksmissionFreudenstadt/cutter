@@ -40,7 +40,7 @@ class SermonSlideProcessor extends AbstractProcessor
     {
         parent::__construct();
         $confManager = \VMFDS\Cutter\Core\ConfigurationManager::getInstance();
-        $this->configuration = $confManager->getConfigurationSet('sermonSlide', 'Processors');
+        $this->configuration = $confManager->getConfigurationSet('sermonSlide', 'processors');
         $this->sermonDB = new \VMFDS\Cutter\Connectors\Typo3Connector();
     }
 
@@ -62,6 +62,11 @@ class SermonSlideProcessor extends AbstractProcessor
                 'form' => '<div id="divNewSlideTitle" class="form-group"><input type="text" name="newSlideTitle" id="newSlideTitle" value="" class="form-control additionalArgument" /></div>',
                 'label' => 'Titel für neue Folie'
             ],
+            3 => [
+                'key' => 'updateSlideSelectJS',
+                'form' => '<script src="'.CUTTER_baseUrl.'Resources/Public/js/processors/SermonSlideProcessor.js"></script>',
+                'label' => ''
+            ]
         ];
     }
 
@@ -87,21 +92,25 @@ class SermonSlideProcessor extends AbstractProcessor
         return $select;
     }
 
+    private function getSlides($sermon) {
+        $sql = 'SELECT * FROM '
+            . $this->getOption('slide_table')
+            . ' WHERE (sermon_id = ' . $sermon . ') AND NOT (deleted) ORDER BY sermon_id, sorting;';
+        return $this->sermonDB->getAll($sql);
+    }
+
     private function slideSelect($sermon = NULL, $includeSelectTag = TRUE)
     {
         $slides = [];
         if ($sermon) {
-            $sql = 'SELECT * FROM '
-                    . $this->getOption('slide_table')
-                    . ' WHERE (sermon_id = ' . $sermon . ') AND NOT (deleted) ORDER BY sermon_id, sorting;';
-            $slides = $this->sermonDB->getAll($sql);
+            $slides = $this->getSlides($sermon);
         }
         $select = '';
         if ($includeSelectTag)
             $select .= '<select class="form-control additionalArgument" name="slide" id="slide"">';
         $select .= '<option value="-1" data-sermon="-1">--- Neue Folie ---</option>';
         foreach ($slides as $slide) {
-            $select .= '<option value="' . $slide['uid'] . '" data-sermon="' . $slide['sermon_id'] . '">' . utf8_encode(sprintf('[%02d]', $slide['sorting']) . ' ' . $slide['title']) . '</option>';
+            $select .= '<option value="' . $slide['uid'] . '" data-sermon="' . $slide['sermon_id'] . '">' . utf8_encode($slide['title']) . '</option>';
         }
         if ($includeSelectTag)
             $select .= '</select>';
@@ -122,7 +131,7 @@ class SermonSlideProcessor extends AbstractProcessor
             if ($options['sermon'] != -1) {
                 // create slide?
                 if ($options['slide'] == -1) {
-                    $options['newSlideTitle'] = $request->getArgument('newSlideTitle');
+                    $options['newSlideTitle'] = utf8_decode($request->getArgument('newSlideTitle'));
                     $slideId = $this->createSlide($options['sermon'], $options['newSlideTitle'], $request->getArgument('legal'));
                 } else {
                     $slideId = $options['slide'];
@@ -185,4 +194,8 @@ class SermonSlideProcessor extends AbstractProcessor
         return $this->slideSelect($request->getArgument('sermon'), false);
     }
 
+    public function getSlidesData() {
+        $request = \VMFDS\Cutter\Core\Request::getInstance();
+        return $this->slideSelect($request->getArgument('sermon'), false);
+    }
 }

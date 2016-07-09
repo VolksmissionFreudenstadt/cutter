@@ -70,4 +70,23 @@ class AjaxController extends AbstractController
             $this->data = $processor->getAdditionalFields();
         }
     }
+
+    public function getDataAction() {
+        $request = \VMFDS\Cutter\Core\Request::getInstance();
+        $request->applyUriPattern(['key', 'field']);
+        if ($request->hasArgument('key')) {
+            $key        = $request->getArgument('key');
+            $template   = \VMFDS\Cutter\Factories\TemplateFactory::get($key);
+            $processor  = $template->getProcessorObject();
+            $processor->setOptionsArray($template->getProcessorOptions());
+
+            $field        = $request->getArgument('field');
+            $methodName = 'get'.ucfirst($field).'Data';
+            if (method_exists($processor, $methodName)) {
+                $this->data = $processor->$methodName();
+            } else {
+                $this->data = [];
+            }
+        }
+    }
 }
