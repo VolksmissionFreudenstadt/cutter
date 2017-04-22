@@ -1,101 +1,206 @@
 <html lang="de">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
-        <title>CUTTER</title>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-        <link rel="stylesheet" href="{{ baseUrl }}Resources/Public/css/jquery.Jcrop.css" type="text/css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.3.0/css/bootstrap-colorpicker.min.css" type="text/css" />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.3.0/js/bootstrap-colorpicker.min.js"></script>
-        <script src="{{ baseUrl }}Resources/Public/js/jquery.Jcrop.js"></script>
-        <script src="{{ baseUrl }}Resources/Public/js/jquery.dropper.js"></script>
-        <script src="{{ baseUrl }}Resources/Public/js/holder/holder.js"></script>
-        <script src="{{ baseUrl }}js/ui.js"></script>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
+    <title>CUTTER</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="{{ baseUrl }}Resources/Public/css/jquery.smartmenus.bootstrap.css" type="text/css"/>
+    <link rel="stylesheet" href="{{ baseUrl }}Resources/Public/css/jquery.Jcrop.css" type="text/css"/>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.3.0/css/bootstrap-colorpicker.min.css"
+          type="text/css"/>
+    <link rel="stylesheet" href="{{ baseUrl }}Resources/Public/css/ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.3.0/js/bootstrap-colorpicker.min.js"></script>
+    <script src="{{ baseUrl }}Resources/Public/js/jquery.smartmenus.min.js"></script>
+    <script src="{{ baseUrl }}Resources/Public/js/jquery.smartmenus.bootstrap.min.js"></script>
+    <script src="{{ baseUrl }}Resources/Public/js/jquery.Jcrop.js"></script>
+    <script src="{{ baseUrl }}Resources/Public/js/jquery.dropper.js"></script>
+    <script src="{{ baseUrl }}Resources/Public/js/holder/holder.js"></script>
+    <script src="{{ baseUrl }}js/ui.js"></script>
 
-    </head>
-    <body>
+</head>
+<body>
 
-        <div class="container">
-            <div class="col-md-4">
-                <div class="panel-group" id="accordion">
-                    {% for templateGroupTitle,templateGroup in templates %}
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#group{{ templateGroupTitle|replace({' ': '', '(': '', ')':''}) }}">{{ templateGroupTitle }}</a>
-                            </h4>
-                        </div>
-                        <div id="group{{ templateGroupTitle|replace({' ': '', '(': '', ')':''}) }}" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                {% for template in templateGroup %}
-                                <a href="#" class="list-group-item templateSelector" 
-                                   data-template="{{ template.key }}">
-                                    <span class="glyphicon glyphicon-{{ template.icon }}"></span>&nbsp;                                       
-                                    {{ template.title }}
-                                    <span class="badge">
-                                        {{template.w}} x {{template.h}}
-                                    </span>
-                                </a>
-                                {% endfor %}
-                            </div>                           
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">CUTTER</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <div class="navbar-form navbar-left">
+                <a class="btn btn-default" href="{{baseUrl}}acquisition/form"><span class="fa fa-upload"></span>&nbsp;</a>
+                <button id="btnCut" type="button" class="btn btn-success" title="Bild zuschneiden"><span
+                        class="fa fa-scissors"></span> Zuschneiden
+                </button>
             </div>
+            <ul class="nav navbar-nav">
+                <li style="margin-right: 20px;">
+                    <a href="#">
+                        <span id="stepIcon"><span></span></span> <span id="stepTitle"><span
+                            class="fa fa-spinner fa-spin"></span></span></span> <span id="measurements"
+                                                                                      class="badge"></span><span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        {% for templateGroupTitle,templateGroup in templates %}
+                        <li>
+                            <a href="#"> {{ templateGroupTitle }} <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                {% for template in templateGroup %}
+                                <li>
+                                    <a href="#" class="templateSelector"
+                                       data-template="{{ template.key }}">
+                                        <span class="glyphicon glyphicon-{{ template.icon }}"></span>&nbsp;
+                                        {{ template.title }}
+                                        <span class="badge pull-right">
+                                                {{template.w}} x {{template.h}}
+                                            </span>
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            </ul>
 
 
-            <div class="col-md-8">
+            <ul class="nav navbar-nav nav-pills">
 
-                <div class="page-header">
-                    <h1 id="stepTitle"></h1>
-                    <span id="stepIcon"><span class="glyphicon glyphicon-{{ template.icon }}"></span>&nbsp;</span><span id="measurements"></span>
-                    <span id="customAR"><input type="text" size="4" id="myW" name="myW">x<input type="text" size="4" id="myH" name="myH"></span>
-                    &nbsp;
-                </div>
-                <div id="results" role="alert"></div>
+                <li class="active"><a data-toggle="tab" href="#imageData">Bild</a></li>
 
-                <!-- This is the image we're attaching Jcrop to -->
-                <div id="cropdiv">
-                    <img src = "{{ image }}" id = "cropbox" width="{{ width }}" height="{{ height }}"/>
-                </div>
-                <div id="data-container"></div><br />
+                <li id="templateDataButton"><a data-toggle="tab" href="#templateData">Daten</a></li>
 
-                <form action = "cut.php" method = "post" onsubmit = "return checkCoords();">
-                    <input type = "hidden" id = "x" name = "x" />
-                    <input type = "hidden" id = "y" name = "y" />
-                    <input type = "hidden" id = "w" name = "w" />
-                    <input type = "hidden" id = "h" name = "h" />
-                    <div id = "arguments"></div>
+                <li><a data-toggle="tab" href="#legalData">Quelle</a></li>
+
+                <li>            <div id="results" role="alert">Ergebnis</div>
+                </li>
+
+            </ul>
+
+
+
+        </div>
+    </div>
+</nav>
+
+<form action="cut.php" method="post" onsubmit="return checkCoords();">
+
+    <div class="tab-content">
+
+        <div id="imageData" class="tab-pane fade in active">
+            <div class="row">
+                <div class="col-md-3" style="padding-left: 25px;">
                     <div class="form-group">
-                        <label for="legal">Quellenangaben zum Bild:</label>
-                        <input type="text" id="legal" name="legal" value="{{ legal }}" class="form-control" />
+                        <label for="textcolor">Farbe der Beschriftung</label>
+                        <div class="input-group colorpick" width="200">
+                            <span class="input-group-btn">
+                                <button id="btnEyeDropper" class="btn btn-default" type="button">
+                                    <span class="fa fa-eyedropper"></span>&nbsp;
+                                </button>
+                            </span>
+                            <input type="text" id="textcolor" name="textcolor" value="#ffffff"
+                                   class="form-control"/>
+                            <span class="input-group-addon" id="pickerButton"><i></i></span>
+                        </div>
                     </div>
+                </div>
+                <div class="col-md-8" id="imageArea">
+
+
+                    <!-- This is the image we're attaching Jcrop to -->
+                    <div id="cropdiv">
+                        <img src="{{ image }}" id="cropbox" width="{{ width }}" height="{{ height }}"/>
+                    </div>
+                    <div id="data-container"></div>
+                    <br/>
+
+
+                    <input type="hidden" id="x" name="x"/>
+                    <input type="hidden" id="y" name="y"/>
+                    <input type="hidden" id="w" name="w"/>
+                    <input type="hidden" id="h" name="h"/>
                     <iframe id="resultsFrame" style="width: 1px; height: 1px; border: none;"></iframe>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <button id="btnCut" type="button" class="btn btn-success">Bild zuschneiden</button>
-                            <button id="btnAbort" type="button" class="btn btn-danger">Zurück zum Upload</button>                            
-                        </div>
-                        <div class="col-sm-2">
-                            <button id="btnEyeDropper" type="button" class="btn btn-default"><span class="glyphicon glyphicon-search"> </span> Farbwähler</button>                            
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="input-group colorpick" width="200">
-                                <input type="text" id="textcolor" name="textcolor" value="#ffffff" class="form-control" />
-                                <span class="input-group-addon"><i></i></span>
-                            </div>                            
-                        </div>
-                    </div>
-                </form>
+
+                </div>
             </div>
         </div>
-        <script type="text/javascript">loadTemplate('{{ firstTemplate }}');</script>
-    </body>
+        <div id="templateData" class="tab-pane fade">
+            <div class="container">
+                <div id="arguments"></div>
+            </div>
+        </div>
+        <div id="legalData" class="tab-pane fade">
+            <div class="container">
+                <div class="form-group">
+                    <label for="legal">Quellenangaben zum Bild:</label>
+                    <input type="text" id="legal" name="legal" value="{{ legal }}" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="meta[license][full]">
+                        Lizenz (komplette Angaben)
+                    </label>
+                    <input class="form-control" type="text" name="meta[license][full]"
+                           value="{{meta.license.full}}"
+                           placeholder="z.B. CC0 Public Domain, https://creativecommons.org/publicdomain/zero/1.0/deed.de"/>
+                </div>
+                <div class="form-group">
+                    <label for="meta[license][short]">
+                        Lizenz (kurz)
+                    </label>
+                    <input class="form-control" type="text" name="meta[license][short]"
+                           value="{{meta.license.short}}" placeholder="z.B. CC0"/>
+                </div>
+                <div class="form-group">
+                    <label for="meta[license][url]">
+                        Lizenz (Link)
+                    </label>
+                    <input class="form-control" type="text" name="meta[license][url]"
+                           value="{{meta.license.url}}"
+                           placeholder="z.B. https://creativecommons.org/publicdomain/zero/1.0/deed.de"/>
+                </div>
+                <div class="form-group">
+                    <label for="meta[url]">
+                        URL zum Bild
+                    </label>
+                    <input class="form-control" type="text" name="meta[url]" value="{{meta.url}}"/>
+                </div>
+                <div class="form-group">
+                    <label for="meta[author]">
+                        Urheber
+                    </label>
+                    <input class="form-control" type="text" name="meta[author]" value="{{meta.author}}"/>
+                </div>
+                <div class="form-group">
+                    <label for="meta[id]">
+                        ID
+                    </label>
+                    <input class="form-control" type="text" name="meta[id]" value="{{meta.id}}"/>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</form>
+<script type="text/javascript">loadTemplate('{{ firstTemplate }}');</script>
+</body>
 
 </html>
