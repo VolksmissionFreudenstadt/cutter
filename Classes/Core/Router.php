@@ -38,7 +38,7 @@ class Router
 
     /**
      * Get an instance of the request object
-     * @return \VMFDS\Cutter\Utility\Request Instance of session object
+     * @return \VMFDS\Cutter\Utility\Router Instance of session object
      */
     static public function getInstance()
     {

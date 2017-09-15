@@ -40,6 +40,9 @@ define('CUTTER_baseUrl',
 // error handling stuff:
 if (CUTTER_debug) {
     ini_set('display_errors', 1);
+    error_reporting(E_ALL && ~E_STRICT);
+} else {
+    ini_set('display_errors', 0);
 }
 
 // logging

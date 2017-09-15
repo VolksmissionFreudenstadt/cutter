@@ -21,90 +21,101 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <html lang="de">
-    <head>
-        <title>CUTTER: Bilddatei auswählen ...</title>
-        <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-        <link rel="stylesheet" href="{{ baseUrl }}Resources/Public/css/uploadfile.min.css" type="text/css" />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-        <script src="{{ baseUrl }}js/cutter.js"></script>
-        <script src="{{ baseUrl }}Resources/Public/js/jquery.uploadfile.min.js"></script>
-    </head>
-    <body>
+<head>
+    <title>CUTTER: Bilddatei auswählen ...</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="{{ baseUrl }}Resources/Public/css/uploadfile.min.css" type="text/css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="{{ baseUrl }}js/cutter.js"></script>
+    <script src="{{ baseUrl }}Resources/Public/js/jquery.uploadfile.min.js"></script>
+</head>
+<body>
 
-        <div class="container">
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <div class="navbar-brand" >CUTTER</div>
+        </div>
+    </div>
+</nav>
 
-            <div class="page-header">
-                <h1>Bilddatei auswählen...</h1>
-            </div>
-            
-            <ul class="nav nav-tabs">
-                <li class="active"><a data-toggle="tab" href="#cloud"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Cloud</a></li>
-                <li><a data-toggle="tab" href="#local"><span class="glyphicon glyphicon-open"></span>&nbsp;Lokaler PC</a></li>
-            </ul>
-            
-            <div class="tab-content">
-                <div id="cloud" class="tab-pane fade in active">
-                    <h2>Mein Bild kommt aus der Cloud</h2>
-                    <form id="crossloadForm" method="get" role="form"  onSubmit="crossloadFormSubmit();" action="{{ baseUrl }}acquisition/import">
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-btn">
+<div class="container">
+
+    <div class="page-header">
+        <h1>Bilddatei auswählen...</h1>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-6">
+            <div id="cloud" class="well">
+                <h2>Aus der Cloud</h2>
+                <form id="crossloadForm" method="get" role="form" onSubmit="crossloadFormSubmit();"
+                      action="{{ baseUrl }}acquisition/import">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input class="form-control" type="text" id="url" name="url"
+                                   placeholder="http://www.example.com/image1.html"/>
+                            <span class="input-group-btn">
                                     <button id="crossloadSubmit" class="btn btn-default" type="button">Laden</button>
                                 </span>
-                                <input class="form-control" type="text" id="url" name="url" placeholder="http://www.example.com/image1.html" /><br />
-                            </div>
                         </div>
-                        <input id="crossloadStep" name="step" type="hidden" value="0" />
-                        <input id="crossloadLegal" name="step" type="hidden" value="" />
-                    </form>
-                </div>
-                <div id="local" class="tab-pane fade">
-                    <h2>Mein Bild kommt von meinem Computer</h2>
-                    <h3>Quellenangaben</h3>
-                    <form id="legal" role="form">
-                        <div class="form-group">
-                            <label for="provider_user">Internetseite</label>
-                            <div class="input-group">
-                                <div class="input-group-btn">
-                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span id="btnProviderSite">{{ providers.0 }}</span> <span class="caret"></span></button>
-                                    <ul>
-                                        {% for item in providers %}
-                                        <li class="providerOption">
-                                            <a href="#">{{ item }}</a>
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                                <input class="form-control" type="text" id="provider_user" placeholder="benutzername"/><br />
-                            </div>
-                            <div class="form-group">
-                                <label for="legal_freetext">oder Freitext:</label>
-                                <input class="form-control" type="text" id="legal_freetext" placeholder="Copyright" /><br />
-                            </div>
-                    </form>
-                    <h3>Bild</h3>
-                    <form id="fileupload" action="{{ baseUrl }}acquisition/uploaded" method="POST" enctype="multipart/form-data" role="form">
-                        <p>
-                            Bitte lade hier das Bild hoch, das du im nächsten Schritt bearbeiten möchtest ...
-                        </p>
-
-                        <input id="origUpload" type="file" name="upload" accept="image/jpeg"/>
-                        <input id="origUploadButton" type="submit" name="submit" value="Upload starten" />
-                        <input type="hidden" name="MAX_FILE_SIZE" value="5000000000">
-                        <input id="legal" type="hidden" name="legal" value="">
-
-                    </form>
-                    <div id="fileuploader">Bild hochladen</div>
-                    
-                </div>
+                    </div>
+                    <input id="crossloadStep" name="step" type="hidden" value="0"/>
+                    <input id="crossloadLegal" name="step" type="hidden" value=""/>
+                </form>
             </div>
+
         </div>
+        <div class="col-md-6">
+            <div id="local" class="well">
+                <h2>Von meinem Computer</h2>
+                <form id="legal" role="form">
+                </form>
+                <form id="fileupload" action="{{ baseUrl }}acquisition/uploaded" method="POST" enctype="multipart/form-data"
+                      role="form">
+                    <p>
+                        Bitte lade hier das Bild hoch, das du im nächsten Schritt bearbeiten möchtest ...
+                    </p>
 
-        <script src="{{ baseUrl }}js/uploadUi.js"></script>
+                    <input id="origUpload" type="file" name="upload" accept="image/jpeg"/>
+                    <input id="origUploadButton" type="submit" name="submit" value="Upload starten"/>
+                    <input type="hidden" name="MAX_FILE_SIZE" value="5000000000">
+                    <input id="legal" type="hidden" name="legal" value="">
 
-    </body>
+                </form>
+                <div id="fileuploader">Bild hochladen</div>
+            </div>
+
+        </div>
+    </div>
+    <hr/>
+    <h3>Zuletzt verwendete Bilder</h3>
+    <div class="row">
+        {% for item in history %}
+        <div class="col-md-2">
+            <a href="{{baseUrl}}acquisition/import?step=0&url={{item.url}}">
+                <img src="{{baseUrl}}Temp/History/{{item.preview}}" class="img-responsive">
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script src="{{ baseUrl }}js/uploadUi.js"></script>
+
+</body>
 
 </html>

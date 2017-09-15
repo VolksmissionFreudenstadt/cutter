@@ -28,17 +28,13 @@ namespace VMFDS\Cutter\Templates;
  *
  * @author chris
  */
-class WebSingleTemplate extends AbstractTemplate
+class InstagramTemplate extends AbstractTemplate
 {
-    protected $category         = 'Veranstaltungen';
-    protected $width            = 1024;
-    protected $height           = 768;
-    protected $processor        = 'Event';
-    protected $suffix           = 'single';
-    protected $title            = 'Einzelansicht';
-    protected $processorOptions = array(
-        'event_field' => 'my_vmfds_events_picture',
-        'event_image_path' => '',
-    );
+    protected $category  = 'Allgemein';
+    protected $height    = 1080;
+    protected $width     = 1080;
+    protected $processor = 'Download';
+    protected $suffix    = 'insta';
+    protected $title     = 'Instagram';
 
 }

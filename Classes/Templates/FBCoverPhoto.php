@@ -24,17 +24,17 @@
 namespace VMFDS\Cutter\Templates;
 
 /**
- * Description of T6PageTitleTemplate
+ * Description of WebSingleTemplate
  *
  * @author chris
  */
-class T6PageTitleTemplate extends AbstractTemplate
+class FBCoverPhotoTemplate extends AbstractTemplate
 {
-    protected $category  = 'Webseite (T6)';
-    protected $height    = 412;
-    protected $width     = 582;
-    protected $processor = 'Download';
-    protected $suffix    = 't6_pagetitle';
-    protected $title     = 'Titelbild für eine Seite';
+    protected $category         = 'Facebook';
+    protected $width            = 828;
+    protected $height           = 315;
+    protected $processor        = 'Download';
+    protected $suffix           = '_fb_cover';
+    protected $title            = 'Titelbild';
 
 }

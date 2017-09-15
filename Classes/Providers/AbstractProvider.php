@@ -23,7 +23,9 @@
 
 namespace VMFDS\Cutter\Providers;
 
-require_once(CUTTER_basePath.'vendor/electrolinux/phpquery/phpQuery/phpQuery.php');
+use VMFDS\Cutter\Factories\LicenseFactory;
+
+require_once(CUTTER_basePath . 'vendor/electrolinux/phpquery/phpQuery/phpQuery.php');
 
 /**
  * Description of AbstractProvider
@@ -32,29 +34,43 @@ require_once(CUTTER_basePath.'vendor/electrolinux/phpquery/phpQuery/phpQuery.php
  */
 class AbstractProvider
 {
-    static protected $handledHosts = array();
-    public $hasCaptcha             = 0;
-    protected $configuration       = array();
+    /** @var array List of hosts handled by this provider */
+    static protected $handledHosts = [];
+
+    /** @var bool True if this provider needs a captcha*/
+    public $hasCaptcha = false;
+
+    /** @var string Final name of the downloaded file */
+    public $workFile = '';
+
+    /** @var string Final string for legal info */
+    public $legal = '';
+
+    /** @var array Internal data */
+    public $data = [];
+
+    /** @var array Provider configuration */
+    protected $configuration = [];
+
+    /** @var  Instance of CURL used */
     protected $curl;
-    public $workFile               = '';
-    public $legal                  = '';
-    public $data                   = array();
+
+    /** @var string Name of the cookie jar for CURL */
+    protected $cookieJar;
+
+    /** @var LicenseFactory */
+    protected $licenseFactory = null;
 
     /**
-     * Checks if this provider can handle urls from a specific host
-     * @param \string $host Host
-     * @return bool True, if provider can handle urls from this host
+     * AbstractProvider constructor.
      */
-    static public function canHandleHost($host)
-    {
-        return in_array($host, self::$handledHosts);
-    }
-
     public function __construct()
     {
         $confManager = \VMFDS\Cutter\Core\ConfigurationManager::getInstance();
         $this->setConfiguration($confManager->getConfigurationSet($this->getKey(),
-                'Providers'));
+            'Providers'));
+        $this->licenseFactory = new LicenseFactory();
+        $this->cookieJar = '/tmp/cutter-cookie-' . md5(time());
         $this->initCurl();
     }
 
@@ -69,9 +85,9 @@ class AbstractProvider
 
     /**
      * Get this provider's key (class without namespace and 'Provider')
-     * @return \string
+     * @return string
      */
-    public function getKey()
+    public function getKey(): string
     {
         $class = get_class($this);
         return str_replace('Provider', '',
@@ -83,7 +99,8 @@ class AbstractProvider
      */
     protected function initCurl()
     {
-        $this->curl = curl_init();
+        $this->curl = \curl_init();
+        curl_setopt($this->curl, CURLOPT_COOKIELIST, '');
         curl_setopt($this->curl, CURLOPT_HEADER, false);
         curl_setopt($this->curl, CURLOPT_NOBODY, false);
         curl_setopt($this->curl, CURLOPT_SSL_VERIFYHOST, 0);
@@ -91,39 +108,25 @@ class AbstractProvider
 //            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/32.0.1700.107 Chrome/32.0.1700.107 Safari/537.36');
         curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->curl, CURLOPT_COOKIESESSION, true);
-        curl_setopt($this->curl, CURLOPT_COOKIEJAR, 'downloads/cookie.txt');  //could be empty, but cause problems on some hosts
-        curl_setopt($this->curl, CURLOPT_COOKIEFILE, 'downloads/cookie.txt');
+        curl_setopt($this->curl, CURLOPT_COOKIEJAR, $this->cookieJar);  //could be empty, but cause problems on some hosts
+        curl_setopt($this->curl, CURLOPT_COOKIEFILE, $this->cookieJar);
         curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($this->curl, CURLOPT_AUTOREFERER, 1);
     }
 
     /**
-     * Wrapper function for curl_exec()
-     *
-     * @param string $url Url to retrieve
-     * @return string Curl answer
+     * Checks if this provider can handle urls from a specific host
+     * @param \string $host Host
+     * @return bool True, if provider can handle urls from this host
      */
-    protected function curl_exec($url)
+    static public function canHandleHost($host): bool
     {
-        curl_setopt($this->curl, CURLOPT_URL, $url);
-        $answer = curl_exec($this->curl);
-        if (($answer === false) || (is_null($answer))) {
-            die(curl_error($this->curl));
-        } else return $answer;
+        return in_array($host, self::$handledHosts);
     }
 
-    /**
-     * Issues a POST request to an url
-     *
-     * @param string $url Url to post to
-     * @param array $data Arguments for the POST request
-     * @return string Answer
-     */
-    protected function post($url, $data = array())
+    public function __destroy()
     {
-        curl_setopt($this->curl, CURLOPT_POST, true);
-        curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($data));
-        return $this->curl_exec($url);
+        if (file_exists($this->cookieJar)) unlink($this->cookieJar);
     }
 
     /**
@@ -132,22 +135,11 @@ class AbstractProvider
      * @param string $html HTML
      * @return \DOMDocument \DOMDocument object
      */
-    protected function getDOMDocument($html)
+    protected function getDOMDocument($html): \DOMDocument
     {
         $doc = new \DOMDocument();
         $doc->loadHTML($html);
         return $doc;
-    }
-
-    /**
-     * Retrieve a file from a URL
-     *
-     * @param string $src URL
-     * @return string File contents
-     */
-    protected function getFile($src)
-    {
-        return $this->curl_exec($src);
     }
 
     /**
@@ -159,9 +151,50 @@ class AbstractProvider
     protected function writeFile($src, $destination)
     {
         $rawFile = $this->getFile($src);
-        $fp      = fopen($destination, 'w');
+        $fp = fopen($destination, 'w');
         fwrite($fp, $rawFile);
         fclose($fp);
+    }
+
+    /**
+     * Resolve redirects for a source url
+     * @param string $src Url
+     */
+    protected function followRedirects($src)
+    {
+        curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, false);
+        while ($src) {
+            echo $src . '<br />';
+            $res = $this->curl_exec($src);
+            $src = curl_getinfo($this->curl, CURLINFO_REDIRECT_URL);
+        }
+        curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
+    }
+
+    /**
+     * Wrapper function for curl_exec()
+     *
+     * @param string $url Url to retrieve
+     * @return string Curl answer
+     */
+    protected function curl_exec($url): string
+    {
+        curl_setopt($this->curl, CURLOPT_URL, $url);
+        $answer = curl_exec($this->curl);
+        if (($answer === false) || (is_null($answer))) {
+            die(curl_error($this->curl));
+        } else return $answer;
+    }
+
+    /**
+     * Retrieve a file from a URL
+     *
+     * @param string $src URL
+     * @return string File contents
+     */
+    protected function getFile($src): string
+    {
+        return $this->curl_exec($src);
     }
 
     /**
@@ -170,7 +203,7 @@ class AbstractProvider
      * @param string $stream Stream
      * @param string $destination Destination path (incl. file name)
      */
-    protected function writeStream($stream, $destination)
+    protected function writeStream($stream, $destination): string
     {
         $fp = fopen($destination, 'w');
         fwrite($fp, $stream);
@@ -182,7 +215,7 @@ class AbstractProvider
      * @param \DOMDocument $doc \DOMDocument object
      * @return string Title
      */
-    protected function getDocTitle($doc)
+    protected function getDocTitle($doc): string
     {
         return $titleField = $doc->getElementsByTagName('title')->item(0)->nodeValue;
     }
@@ -215,38 +248,13 @@ class AbstractProvider
     protected function replaceMarkers($text, $markers, $sanitize = TRUE)
     {
         foreach ($markers as $needle => $val) {
-            $searchArray[] = '###'.strtoupper($needle).'###';
+            $searchArray[] = '###' . strtoupper($needle) . '###';
             if ($sanitize) {
                 $val = str_replace(' ', '-', str_replace('.', '', trim($val)));
             }
             $replaceArray[] = $val;
         }
         return str_replace($searchArray, $replaceArray, $text);
-    }
-
-    /**
-     * Extract a form from a document
-     *
-     * @param \DOMDocument $doc Document
-     * @param string $id Id of the form or a parent element
-     * @return array Form data
-     */
-    protected function getForm($doc, $id)
-    {
-        $data = array();
-        $el   = $doc->getElementById($id);
-        if ($el->tagName != 'form') {
-            $el = $el->getElementsByTagName('form')->item(0);
-        }
-        $data['action'] = $el->getAttribute('action');
-        $inputs         = $el->getElementsByTagName('input');
-        foreach ($inputs as $input) {
-            $key = $input->getAttribute('name');
-            if ($key) {
-                $data['arguments'][$key] = $input->getAttribute('value');
-            }
-        }
-        return $data;
     }
 
     /**
@@ -266,14 +274,53 @@ class AbstractProvider
         $host = parse_url($form['action'], PHP_URL_HOST);
         if (!$host) {
             $form['action'] = $this->config['baseUrl']
-                .(substr($form['action'], 0, 1) == '/' ? '' : '/')
-                .$form['action'];
+                . (substr($form['action'], 0, 1) == '/' ? '' : '/')
+                . $form['action'];
         }
         return $this->post($form['action'], $form['arguments']);
     }
 
+    /**
+     * Extract a form from a document
+     *
+     * @param \DOMDocument $doc Document
+     * @param string $id Id of the form or a parent element
+     * @return array Form data
+     */
+    protected function getForm($doc, $id)
+    {
+        $data = array();
+        $el = $doc->getElementById($id);
+        if ($el->tagName != 'form') {
+            $el = $el->getElementsByTagName('form')->item(0);
+        }
+        $data['action'] = $el->getAttribute('action');
+        $inputs = $el->getElementsByTagName('input');
+        foreach ($inputs as $input) {
+            $key = $input->getAttribute('name');
+            if ($key) {
+                $data['arguments'][$key] = $input->getAttribute('value');
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Issues a POST request to an url
+     *
+     * @param string $url Url to post to
+     * @param array $data Arguments for the POST request
+     * @return string Answer
+     */
+    protected function post($url, $data = array())
+    {
+        curl_setopt($this->curl, CURLOPT_POST, true);
+        curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($data));
+        return $this->curl_exec($url);
+    }
+
     protected function dump($s, $title = '')
     {
-        return '<pre>'.($title ? '<b>'.$title.':</b>' : '').print_r($s, true).'</pre>';
+        return '<pre>' . ($title ? '<b>' . $title . ':</b>' : '') . print_r($s, true) . '</pre>';
     }
 }

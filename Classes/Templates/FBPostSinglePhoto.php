@@ -28,17 +28,13 @@ namespace VMFDS\Cutter\Templates;
  *
  * @author chris
  */
-class WebSingleTemplate extends AbstractTemplate
+class FBPostSinglePhotoTemplate extends AbstractTemplate
 {
-    protected $category         = 'Veranstaltungen';
-    protected $width            = 1024;
-    protected $height           = 768;
-    protected $processor        = 'Event';
-    protected $suffix           = 'single';
-    protected $title            = 'Einzelansicht';
-    protected $processorOptions = array(
-        'event_field' => 'my_vmfds_events_picture',
-        'event_image_path' => '',
-    );
+    protected $category         = 'Facebook';
+    protected $width            = 470;
+    protected $height           = 470;
+    protected $processor        = 'Download';
+    protected $suffix           = '_fb_post_single';
+    protected $title            = 'Einzelnes Bild posten';
 
 }

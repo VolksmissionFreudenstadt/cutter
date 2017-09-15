@@ -2,3 +2,4 @@ host: localhost
 user: vmfredbb
 pass: fdsvmec
 name: usrdb_vmfredbb_v3_typo3
+setIgnoreSqlMode: 1

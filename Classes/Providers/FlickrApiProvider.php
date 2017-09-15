@@ -24,17 +24,17 @@
 
 namespace VMFDS\Cutter\Providers;
 
-class PixabayProvider extends AbstractProvider
+use VMFDS\Cutter\Factories\LicenseFactory;
+
+class FlickrApiProvider extends AbstractProvider
 {
 
-    static protected $handledHosts = ['pixabay.com'];
+    static protected $handledHosts = ['flickr.com', 'www.flickr.com'];
     public $hasCaptcha = 0;
 
     public function __construct()
     {
         parent::__construct();
-        $this->configuration['baseUrl'] = 'https://pixabay.com/en/photos/download/';
-        $this->configuration['loginUrl'] = 'https://pixabay.com/en/accounts/login/';
     }
 
     /**
@@ -55,7 +55,7 @@ class PixabayProvider extends AbstractProvider
      */
     static public function getName()
     {
-        return 'pixabay';
+        return 'flickr';
     }
 
     /**
@@ -66,53 +66,46 @@ class PixabayProvider extends AbstractProvider
     public function retrieveImage($imageUrl)
     {
         $session = \VMFDS\Cutter\Core\Session::getInstance();
+        $id = $this->getId($imageUrl);
+        $res = $this->api('flickr.photos.getSizes', ['photo_id' => $id]);
 
-        $this->login($imageUrl);
-        $pDoc = \PhpQuery::newDocumentHTML($this->getFile($imageUrl));
-
-
-        $meta['url'] = $imageUrl;
-        $meta['title'] = '';
-        $tags = $pDoc->find('h1 a');
-        foreach ($tags as $tag) {
-            $meta['keywords'][] = $tag->textContent;
-        }
-        $meta['description'] = '';
-
-        $metaItems = array();
-        foreach (pq('meta') as $metaObj) {
-            $key = pq($metaObj)->attr('name');
-            $value = pq($metaObj)->attr('content');
-            $metaItems[$key] = $value;
+        // find largest size
+        $imageRecord = null;
+        foreach ($res->sizes->size as $size) {
+            if (is_null($imageRecord) || ($size->width > $imageRecord->width)) $imageRecord = $size;
         }
 
+        $src = $imageRecord->source;
 
-        foreach (pq('div.right div.clearfix a') as $item) {
-            $author = explode(' / ', trim((string)(pq($item)->html())))[0];
+        // get image info
+        $imageInfo = $this->api('flickr.photos.getInfo', ['photo_id' => $id])->photo;
+
+        // get license info
+        $licenses = $this->api('flickr.photos.licenses.getInfo', [])->licenses->license;
+        $license = $this->licenseFactory->getByUrl($licenses[$imageInfo->license]->url);
+
+        // get official image url
+        foreach ($imageInfo->urls->url as $url) {
+            if ($url->type == 'photopage') $imageUrl = $url->_content;
         }
-        $meta['author'] = $author;
-        $meta['license'] =
-            [
-                'full' => 'CC0 Public Domain, https://creativecommons.org/publicdomain/zero/1.0/deed.de',
-                'short' => 'CC0',
-                'url' => 'https://creativecommons.org/publicdomain/zero/1.0/deed.de',
-            ];
 
+        $markers = [
+            'id' => $id,
+            'user' => $imageInfo->owner->username,
+            'user_name' => $imageInfo->owner->realname,
+        ];
 
-        $path = basename(parse_url($imageUrl, PHP_URL_PATH));
-
-        $tmp = explode('-', $path);
-        $markers['id'] = $meta['id'] = substr($tmp[count($tmp) - 1], 0, -1);
-
-        unset($tmp[count($tmp) - 1]);
-        $markers['title'] = join('-', $tmp);
-        $markers['user'] = $meta['author'];
+        $meta = [
+            'title' => $imageInfo->title->_content,
+            'url' => $imageUrl,
+            'description' => $imageInfo->description->_content,
+            'author' => $imageInfo->owner->realname,
+            'license' => $license,
+            'id' => $id,
+        ];
 
         // set meta data for IPTC tagging
         $session->setArgument('meta', $meta);
-
-        $src = str_replace('_640', '_1280', $metaItems['twitter:image']);
-
         $this->workFile = $this->replaceMarkers($this->configuration['fileNamePattern'], $markers);
         $this->legal = $this->replaceMarkers($this->configuration['legalPattern'], $markers, false);
 
@@ -121,23 +114,40 @@ class PixabayProvider extends AbstractProvider
     }
 
     /**
-     * @return string Answer
+     * Extract the image id from the url
+     * @param string $imageUrl Url
+     * @return string id
      */
-    protected function login($imageUrl)
+    protected function getId($imageUrl)
     {
-        $res = $this->post('https://pixabay.com/en/accounts/login/', [
-            'username' => $this->configuration['login']['user'],
-            'password' => $this->configuration['login']['password'],
-            'next' => pathinfo($imageUrl, PATHINFO_DIRNAME) . '/',
-            'submit' => 'Log in',
-        ]);
+        return explode('/', parse_url($imageUrl, PHP_URL_PATH))[3];
+    }
 
-        return $res;
+    protected function api($method, $params)
+    {
+        $params = array_merge([
+            'format' => 'json',
+            'nojsoncallback' => 1,
+        ], $params);
+        $apiKey = $this->configuration['api']['key'];
+        $args = [];
+        foreach ($params as $key => $val) {
+            $args[] = $key . '=' . $val;
+        }
+        $url = 'https://api.flickr.com/services/rest/?api_key=' . $apiKey . '&method=' . $method . (count($args) ? '&' . join('&', $args) : '');
+        return json_decode($this->getFile($url));
     }
 
     protected function getFile($src): string
     {
         return file_get_contents($src);
+    }
+
+    /**
+     * @return string Answer
+     */
+    protected function login($imageUrl)
+    {
     }
 
 }

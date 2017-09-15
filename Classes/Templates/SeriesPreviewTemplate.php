@@ -24,21 +24,23 @@
 namespace VMFDS\Cutter\Templates;
 
 /**
- * Description of WebSingleTemplate
+ * Description of SeriesTitleTemplate
  *
  * @author chris
  */
-class WebSingleTemplate extends AbstractTemplate
+class SeriesPreviewTemplate extends AbstractTemplate
 {
-    protected $category         = 'Veranstaltungen';
-    protected $width            = 1024;
-    protected $height           = 768;
-    protected $processor        = 'Event';
-    protected $suffix           = 'single';
-    protected $title            = 'Einzelansicht';
+    protected $category         = 'Predigten';
+    protected $width            = 1400;
+    protected $height           = 350;
+    protected $processor        = 'Sermon';
+    protected $suffix           = 'series_preview';
+    protected $title            = 'Vorschaubild (Reihe)';
     protected $processorOptions = array(
-        'event_field' => 'my_vmfds_events_picture',
-        'event_image_path' => '',
+        'sermon_table' => 'tx_vmfdssermons_domain_model_series',
+        'image_field' => 'image_preview',
+        'date_field' => 'startdate',
+        'label' => 'Reihe'
     );
 
 }

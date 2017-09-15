@@ -106,4 +106,20 @@ class Image
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug(
             'Done inserting legal text.');
     }
+
+    /**
+     * Get the width of the image
+     * @return int Width of the image
+     */
+    public function getWidth() {
+        return imagesx($this->image);
+    }
+
+    /**
+     * Get the height of the image
+     * @return int Height
+     */
+    public function getHeight() {
+        return imagesy($this->image);
+    }
 }

@@ -31,8 +31,8 @@ namespace VMFDS\Cutter\Templates;
 class WebPortalTemplate extends AbstractTemplate
 {
     protected $category         = 'Veranstaltungen';
-    protected $height           = 412;
-    protected $width            = 631;
+    protected $width            = 1400;
+    protected $height           = 350;
     protected $processor        = 'Event';
     protected $suffix           = 'portal';
     protected $title            = 'Portalvorschau';

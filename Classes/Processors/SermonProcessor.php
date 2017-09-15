@@ -56,17 +56,21 @@ class SermonProcessor extends AbstractProcessor
     private function sermonSelect()
     {
         $dateField = $this->getOption('date_field');
+        $imageField = $this->getOption('image_field');
+        $imageField = $imageField ? $imageField : 'image';
         $where     = array();
         $sql       = 'SELECT uid, title'.($dateField ? ', '.$dateField : '').' FROM '
             .$this->getOption('sermon_table')
-            .' WHERE image=\'\' '.($dateField ? 'ORDER BY '.$dateField.' DESC' : '').';';
+            .' WHERE '.$imageField.'=\'\' '.($dateField ? 'ORDER BY '.$dateField.' DESC' : '').';';
         $sermons   = $this->sermonDB->getAll($sql);
 
         $select = '<select class="form-control" name="sermon" id="sermon"><option value="-1">-- Keine '
             .$this->getOption('label').', Datei herunterladen --</option>';
         foreach ($sermons as $row) {
             if ($dateField) {
-                $rowTitle = strftime('%d.%m.%Y', $row[$dateField]);
+                $rowTitle = strftime('%d.%m.%Y', ($row[$dateField] + 0));
+            } else {
+                $rowTitle = '';
             }
             $rowTitle = utf8_encode($rowTitle.' '.$row['title']);
             $select .= '<option value="'.$row['uid'].'">'.$rowTitle.'</option>';
@@ -84,6 +88,8 @@ class SermonProcessor extends AbstractProcessor
      */
     public function process($fileName, $options)
     {
+        $imageField = $this->getOption('image_field');
+        $imageField = $imageField ? $imageField : 'image';
         if ($this->checkRequiredArguments($options)) {
             if ($options['sermon'] != -1) {
                 // move file:
@@ -91,7 +97,7 @@ class SermonProcessor extends AbstractProcessor
                 copy($fileName, $this->configuration['move_to'].$destFile);
 
                 $sql = 'UPDATE '.$this->getOption('sermon_table')
-                    .' SET image =\''.$this->sermonDB->escape($destFile).'\' WHERE '
+                    .' SET '.$imageField.' =\''.$this->sermonDB->escape($destFile).'\' WHERE '
                     .' (uid='.$options['sermon'].');';
                 $this->sermonDB->query($sql);
                 $res = array('result' => self::RESULT_OK);

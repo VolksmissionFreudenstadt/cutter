@@ -24,7 +24,7 @@
 
 namespace VMFDS\Cutter\Providers;
 
-class PixabayProvider extends AbstractProvider
+class PixabayApiProvider extends AbstractProvider
 {
 
     static protected $handledHosts = ['pixabay.com'];

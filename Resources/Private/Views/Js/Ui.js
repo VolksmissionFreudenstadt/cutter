@@ -26,8 +26,7 @@ var cropRestore;
 var currentAspectRatio = 0;
 var baseUrl = '{{ baseUrl}}';
 
-function updateCoords(c)
-{
+function updateCoords(c) {
     $('#x').val(c.x);
     $('#y').val(c.y);
     $('#w').val(c.w);
@@ -43,24 +42,36 @@ function loadTemplate(key) {
         $('#measurements').html(data.w + ' x ' + data.h);
 
         // additional options
+        console.log('Retrieving option fields: ' + '{{ baseUrl  }}ajax/options/' + key);
         $.getJSON('{{ baseUrl  }}ajax/options/' + key, function (opts) {
             console.log(opts);
 
             var form = '';
             var i;
-            for (i = 0; i < opts.length; i++) {
-                if (opts[i]['label']) {
-                    form = form + '<div class="form-group">'
-                    form = form + '<label for="' + opts[i]['key'] + '">' + opts[i]['label'] + '</label> '
-                        + opts[i]['form'];
-                    form = form + '</div>'
-                } else {
-                    form = form + opts[i]['form'];
+
+            if (opts.length > 0) {
+                $('#templateDataButton').removeClass('disabled');
+                $('#templateDataButton a').attr('data-toggle', 'tab').attr('href', '#templateData');
+                for (i = 0; i < opts.length; i++) {
+                    if (opts[i]['label']) {
+                        form = form + '<div class="form-group">'
+                        form = form + '<label for="' + opts[i]['key'] + '">' + opts[i]['label'] + '</label> '
+                            + opts[i]['form'];
+                        form = form + '</div>'
+                    } else {
+                        form = form + opts[i]['form'];
+                    }
                 }
-            }
-            $('#arguments').html(form);
-            for (i = 0; i < opts.length; i++) {
-                $('#' + opts[i]['key']).addClass('additionalArgument');
+                $('#arguments').html(form);
+                for (i = 0; i < opts.length; i++) {
+                    $('#' + opts[i]['key']).addClass('additionalArgument');
+                }
+            } else {
+                if ($('#templateDataButton').hasClass('active')) {
+                    $('.nav-pills a[href="#imageData"]').tab('show');
+                }
+                $('#templateDataButton').addClass('disabled');
+                $('#templateDataButton a').attr('data-toggle', '').removeAttr('href');
             }
         });
 
@@ -101,6 +112,12 @@ function doCut() {
     uri = uri + '&color=' + color;
     $('.additionalArgument').each(function () {
         uri = uri + '&' + $(this).attr('id') + '=' + $(this).val();
+    });
+
+    $('input.form-control').each(function () {
+        if ($(this).attr('name').substr(0, 4) == 'meta') {
+            uri = uri + '&' + $(this).attr('name') + '=' + $(this).val();
+        }
     });
     console.log('Calling CUT action via AJAX at ' + uri);
     $.getJSON(uri, function (data) {
@@ -143,7 +160,7 @@ $('document').ready(function () {
     cropper = $.Jcrop($('#cropbox'), {
         aspectRatio: 1 / 1,
         onSelect: updateCoords,
-        boxHeight: 400
+        boxWidth: ($('#imageArea').width())
     });
 
     $('#customAR').hide();
@@ -159,7 +176,9 @@ $('document').ready(function () {
     });
 
 
-    $('.colorpick').colorpicker();
+    $('.colorpick').colorpicker({
+        component: '#pickerbutton'
+    });
 
     $('#btnEyeDropper').click(function () {
         var w = $('#cropbox').width();
@@ -176,17 +195,19 @@ $('document').ready(function () {
 
         $('#cropbox').dropper({
             clickCallback: function (color) {
+                $('div#jquery-dropper-hover-chip').remove();
                 $('#textcolor').val('#' + color.rgbhex);
+                $('#textcolor').trigger('change');
                 // restore cropper
                 $('#cropdiv').html(origPictureHtml);
                 cropper = $.Jcrop($('#cropbox'), cropRestore.options);
                 cropper.setSelect(
-                        [
-                            cropRestore.select.x,
-                            cropRestore.select.y,
-                            cropRestore.select.x2,
-                            cropRestore.select.y2
-                        ]);
+                    [
+                        cropRestore.select.x,
+                        cropRestore.select.y,
+                        cropRestore.select.x2,
+                        cropRestore.select.y2
+                    ]);
             }
         });
     });

@@ -56,16 +56,22 @@ class CutController extends AbstractController
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('do Action');
         $session = \VMFDS\Cutter\Core\Session::getInstance();
         $request = \VMFDS\Cutter\Core\Request::getInstance();
+
         // we just die, since this is a headless controller
         if (!$session->hasArgument('workFile')) die('workfile');
-        $request->requireArguments(array('x', 'y', 'w', 'h', 'template', 'color'));
-        \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('All necessary arguments are present.');
+	    $request->requireArguments(array('x', 'y', 'w', 'h', 'template', 'color'));
+	    \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('All necessary arguments are present.');
+
+	    // update meta from request
+	    $session->setArgument('meta', array_replace_recursive($session->getArgument('meta'), $request->getArgument('meta')));
 
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Loading template '.$request->getArgument('template'));
         $template  = \VMFDS\Cutter\Factories\TemplateFactory::get($request->getArgument('template'));
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Loading processor '.$template->getProcessor());
         $processor = $template->getProcessorObject();
         $processor->setOptionsArray($template->getProcessorOptions());
+
+        $meta    = $session->getArgument('meta');
 
         $destinationFile = CUTTER_basePath.'Temp/Processed/'.
             pathinfo($session->getArgument('workFile'), PATHINFO_FILENAME)
@@ -86,7 +92,7 @@ class CutController extends AbstractController
             $template->getWidth(), $template->getHeight(),
             $request->getArgument('w'), $request->getArgument('h'));
         if ($request->hasArgument('legal')) {
-            $legal = $request->getArgument('legal');
+            $legal = $request->getArgument('legal').($meta['license']['short'] ? ' // Lizenz: '.$meta['license']['short'] : '');
             \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Legal text is "'.$legal.'"');
             $image->setLegalText('Bild: '.$legal, $template->getWidth(),
                 $template->getHeight(), $color);
@@ -97,7 +103,6 @@ class CutController extends AbstractController
 
         // Embed IPTC data
         $session = \VMFDS\Cutter\Core\Session::getInstance();
-        $meta    = $session->getArgument('meta');
         $i       = new \VMFDS\Cutter\Core\IPTC($destinationFile);
         $i->set(IPTC_BYLINE, $meta['author']);
         $i->set(IPTC_COPYRIGHT_STRING, $legal.', '.$meta['url']);
@@ -105,8 +110,8 @@ class CutController extends AbstractController
         $i->set(IPTC_PROGRAM_VERSION, CUTTER_version);
         $i->set(IPTC_SOURCE, $session->getArgument('original_url'));
         $i->set(IPTC_REFERENCE_NUMBER, $session->getArgument($meta['id']));
-        if ($meta['license']) {
-            $i->set(IPTC_SPECIAL_INSTRUCTIONS, 'Lizenz: '.$meta['license']);
+        if (is_array($meta)) {
+            $i->set(IPTC_SPECIAL_INSTRUCTIONS, json_encode($meta));
         }
         $i->set(IPTC_CAPTION, $meta['title']);
         $i->set(IPTC_HEADLINE, $meta['title']);

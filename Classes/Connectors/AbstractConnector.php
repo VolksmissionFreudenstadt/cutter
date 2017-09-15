@@ -42,6 +42,9 @@ class AbstractConnector
             $this->configuration['host'], $this->configuration['user'],
             $this->configuration['pass'], $this->configuration['name']
         );
+        if ($this->configuration['setIgnoreSqlMode']) {
+            $this->db->query('SET SESSION sql_mode = \'\'');
+        }
     }
 
     /**

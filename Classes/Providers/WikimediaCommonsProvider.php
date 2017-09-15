@@ -24,10 +24,10 @@
 
 namespace VMFDS\Cutter\Providers;
 
-class PixabayProvider extends AbstractProvider
+class WikimediaCommonsProvider extends AbstractProvider
 {
 
-    static protected $handledHosts = ['pixabay.com'];
+    static protected $handledHosts = ['commons.wikimedia.org'];
     public $hasCaptcha = 0;
 
     public function __construct()
@@ -55,7 +55,7 @@ class PixabayProvider extends AbstractProvider
      */
     static public function getName()
     {
-        return 'pixabay';
+        return 'wikimediaCommons';
     }
 
     /**
@@ -71,47 +71,55 @@ class PixabayProvider extends AbstractProvider
         $pDoc = \PhpQuery::newDocumentHTML($this->getFile($imageUrl));
 
 
+        $rawUrl = $pDoc->find('div.fullMedia a.internal');
+
         $meta['url'] = $imageUrl;
-        $meta['title'] = '';
-        $tags = $pDoc->find('h1 a');
-        foreach ($tags as $tag) {
-            $meta['keywords'][] = $tag->textContent;
+
+        // get more info via api
+        $shortName = str_replace('https://commons.wikimedia.org/wiki/', '', $imageUrl);
+        $apiUrl = 'https://commons.wikimedia.org/w/api.php?action=query&titles=' . $shortName . '&prop=imageinfo&iiprop=extmetadata&format=json';
+        $apiResult = json_decode($this->getFile($apiUrl), true);
+        $info = [];
+        foreach ($apiResult['query']['pages'] as $page) {
+            foreach ($page['imageinfo'] as $imageInfo) {
+                foreach ($imageInfo['extmetadata'] as $key => $data) {
+                    $info[lcfirst($key)] = $data['value'];
+                }
+            }
         }
-        $meta['description'] = '';
 
-        $metaItems = array();
-        foreach (pq('meta') as $metaObj) {
-            $key = pq($metaObj)->attr('name');
-            $value = pq($metaObj)->attr('content');
-            $metaItems[$key] = $value;
+        $meta['title'] = $info['objectName'];
+        $meta['keywords'] = explode('|', $info['categories']);
+        $meta['description'] = $info['imageDescription'];
+
+
+        // author
+        $pDoc = \PhpQuery::newDocumentHTML($info['artist']);
+        $meta['author'] = $pDoc->find('a:first')->text();
+
+        $meta['license'] = [
+            'full' => $info['licenseShortName'] . ', ' . $info['licenseUrl'],
+            'short' => $info['licenseShortName'],
+            'url' => $info['licenseUrl']
+        ];
+
+
+        // get the url
+        $apiUrl = 'https://commons.wikimedia.org/w/api.php?action=query&titles=' . $shortName . '&prop=imageinfo&iiprop=url&format=json';
+        $apiResult = json_decode($this->getFile($apiUrl), true);
+        foreach ($apiResult['query']['pages'] as $page) {
+            foreach ($page['imageinfo'] as $imageInfo) {
+                $src = $meta['src'] = $imageInfo['url'];
+            }
         }
 
+        $markers['id'] = $meta['id'] = str_replace(':', '__', $shortName);
 
-        foreach (pq('div.right div.clearfix a') as $item) {
-            $author = explode(' / ', trim((string)(pq($item)->html())))[0];
-        }
-        $meta['author'] = $author;
-        $meta['license'] =
-            [
-                'full' => 'CC0 Public Domain, https://creativecommons.org/publicdomain/zero/1.0/deed.de',
-                'short' => 'CC0',
-                'url' => 'https://creativecommons.org/publicdomain/zero/1.0/deed.de',
-            ];
-
-
-        $path = basename(parse_url($imageUrl, PHP_URL_PATH));
-
-        $tmp = explode('-', $path);
-        $markers['id'] = $meta['id'] = substr($tmp[count($tmp) - 1], 0, -1);
-
-        unset($tmp[count($tmp) - 1]);
-        $markers['title'] = join('-', $tmp);
+        $markers['title'] = str_replace(' ', '_', $meta['title']);
         $markers['user'] = $meta['author'];
 
         // set meta data for IPTC tagging
         $session->setArgument('meta', $meta);
-
-        $src = str_replace('_640', '_1280', $metaItems['twitter:image']);
 
         $this->workFile = $this->replaceMarkers($this->configuration['fileNamePattern'], $markers);
         $this->legal = $this->replaceMarkers($this->configuration['legalPattern'], $markers, false);
@@ -123,7 +131,8 @@ class PixabayProvider extends AbstractProvider
     /**
      * @return string Answer
      */
-    protected function login($imageUrl)
+    protected
+    function login($imageUrl)
     {
         $res = $this->post('https://pixabay.com/en/accounts/login/', [
             'username' => $this->configuration['login']['user'],
@@ -135,7 +144,8 @@ class PixabayProvider extends AbstractProvider
         return $res;
     }
 
-    protected function getFile($src): string
+    protected
+    function getFile($src): string
     {
         return file_get_contents($src);
     }

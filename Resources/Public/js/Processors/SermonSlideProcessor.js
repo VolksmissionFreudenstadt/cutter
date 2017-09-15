@@ -1,4 +1,3 @@
-<?php
 /*
  * CUTTER
  * Versatile Image Cutter and Processor
@@ -21,24 +20,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace VMFDS\Cutter\Templates;
+/**
+ * Update the slide select box
+ */
+function updateSlideSelect() {
+    var ajaxUrl = baseUrl+'ajax/getData/' + $('#data-container').data('key') + '/slides/?sermon='+$('#sermon').val();
+    console.log('Calling AJAX: '+ ajaxUrl);
+    $.getJSON(ajaxUrl, function (opts) {
+        $('#slide').html(opts);
+    });
+}
 
 /**
- * Description of WebSingleTemplate
+ * Update arguments (here: slide select) after a successful cut
  *
- * @author chris
+ * This function will be called by the cutter js.
  */
-class WebSingleTemplate extends AbstractTemplate
-{
-    protected $category         = 'Veranstaltungen';
-    protected $width            = 1024;
-    protected $height           = 768;
-    protected $processor        = 'Event';
-    protected $suffix           = 'single';
-    protected $title            = 'Einzelansicht';
-    protected $processorOptions = array(
-        'event_field' => 'my_vmfds_events_picture',
-        'event_image_path' => '',
-    );
-
+function updateArgumentsAfterCut() {
+    updateSlideSelect();
 }
+
+updateSlideSelect();

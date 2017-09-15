@@ -38,7 +38,7 @@ class DefaultFetchFromUrlProvider extends AbstractProvider
      * @param \string $host Host
      * @return bool True, if provider can handle urls from this host
      */
-    static public function canHandleHost($host)
+    static public function canHandleHost($host): bool
     {
         return FALSE;
     }

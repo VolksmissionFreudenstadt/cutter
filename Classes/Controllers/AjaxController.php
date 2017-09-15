@@ -40,7 +40,7 @@ class AjaxController extends AbstractController
      * (2) Content-Type will be set to application/json
      * (3) an internal array $data will be output as JSON
      */
-    public function renderView()
+    public function renderView($show = true)
     {
         $this->view->setContentType('application/json');
         $this->view->sendContentTypeHeader();

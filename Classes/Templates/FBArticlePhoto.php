@@ -24,17 +24,17 @@
 namespace VMFDS\Cutter\Templates;
 
 /**
- * Description of FunkyCarouselTemplate
+ * Description of WebSingleTemplate
  *
  * @author chris
  */
-class FunkyCarouselTemplate extends AbstractTemplate
+class FBArticlePhotoTemplate extends AbstractTemplate
 {
-    protected $category  = 'Webseite (Funky)';
-    protected $height    = 730;
-    protected $width     = 1400;
-    protected $processor = 'Download';
-    protected $suffix    = 'funky_carousel';
-    protected $title     = 'Bild für das Karussell';
+    protected $category         = 'Facebook';
+    protected $width            = 470;
+    protected $height           = 246;
+    protected $processor        = 'Download';
+    protected $suffix           = '_fb_article';
+    protected $title            = 'Artikelbild';
 
 }

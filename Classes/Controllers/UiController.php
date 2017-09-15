@@ -24,6 +24,10 @@ namespace VMFDS\Cutter\Controllers;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use VMFDS\Cutter\Core\Request;
+use VMFDS\Cutter\Core\Router;
+use VMFDS\Cutter\Core\Session;
+
 class UiController extends AbstractController
 {
 
@@ -53,11 +57,12 @@ class UiController extends AbstractController
         $this->view->assign('image',
             CUTTER_baseUrl.'Temp/Uploads/'.$session->getArgument('workFile'));
 
-        $imgInfo = getimagesize(CUTTER_baseUrl.'Temp/Uploads/'.$session->getArgument('workFile'));
+        $imgInfo = getimagesize(CUTTER_basePath.'Temp/Uploads/'.$session->getArgument('workFile'));
         $this->view->assign('width', $imgInfo[0]);
         $this->view->assign('height', $imgInfo[1]);
 
         $this->view->assign('legal', $session->getArgument('legal'));
+        $this->view->assign('meta', $session->getArgument('meta'));
 
         $info = \VMFDS\Cutter\Factories\TemplateFactory::getTemplateInfo();
         $this->view->assign('templates', $info);
@@ -97,5 +102,18 @@ class UiController extends AbstractController
             readfile($raw);
             die();
         }
+    }
+
+    /**
+     * Set changes to meta record
+     */
+    public function setMetaAction() {
+        $request = Request::getInstance();
+
+        $session = Session::getInstance();
+        $session->setArgument('meta', array_replace_recursive($session->getArgument('meta'), $request->getArgument('meta')));
+        $router = Router::getInstance();
+        $router->redirect('ui', 'index');
+
     }
 }

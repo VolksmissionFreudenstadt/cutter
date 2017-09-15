@@ -42,7 +42,7 @@ class FreeImagesProvider extends AbstractProvider
      * @param \string $host Host
      * @return bool True, if provider can handle urls from this host
      */
-    static public function canHandleHost($host)
+    static public function canHandleHost($host): bool
     {
         return in_array($host, self::$handledHosts);
     }
@@ -83,7 +83,13 @@ class FreeImagesProvider extends AbstractProvider
         }
         $meta['description'] = $pDoc->find('.detail-info-tags p')->text();
         $meta['author']      = $markers['user']     = $pDoc->find('#photographer-name')->text();
-        $meta['license']     = 'Freeimages.com Content License, http://www.freeimages.com/license';
+        $meta['license']     =
+            [
+                'full' => 'Freeimages.com Content License, http://www.freeimages.com/license',
+                'url' => 'http://www.freeimages.com/license',
+                'short' => 'Freeimages.com CL',
+            ];
+
 
 
         $links = $pDoc->find('.img-btns li a');

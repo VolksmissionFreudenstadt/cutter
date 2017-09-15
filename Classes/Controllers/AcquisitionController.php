@@ -48,6 +48,10 @@ class AcquisitionController extends AbstractController
         // get list of possible providers
         $providers = \VMFDS\Cutter\Factories\ProviderFactory::getProviderNames();
         $this->view->assign('providers', $providers);
+
+        // get history
+        $history = array_reverse(yaml_parse_file(CUTTER_basePath.'Temp/History/History.yaml'));
+        $this->view->assign('history', $history);
     }
 
     /**
@@ -91,7 +95,25 @@ class AcquisitionController extends AbstractController
         $this->renderView();
 
         $provider->retrieveImage($url);
-        if (CUTTER_debug) print_r($provider);
+        //if (CUTTER_debug) print_r($provider);
+
+        // save image in history
+        $destinationFile = CUTTER_basePath.'Temp/History/'.
+            pathinfo($provider->workFile, PATHINFO_FILENAME)
+            .'_history.jpg';
+        $imageFile = CUTTER_uploadPath.$provider->workFile;
+        $converter = \VMFDS\Cutter\Factories\ConverterFactory::getFileHandler($imageFile);
+        $image = new \VMFDS\Cutter\Core\Image($converter->getImage($imageFile));
+        $h = $image->getHeight()*(300/$image->getWidth());
+        $image->resize(0, 0, 300, $h, $image->getWidth(), $image->getHeight());
+        $image->toJpeg($destinationFile, 100);
+
+        $fp = fopen(CUTTER_basePath.'Temp/History/History.yaml', 'a');
+        fwrite ($fp, '- url: '.$url."\n");
+        fwrite ($fp, '  preview: '.pathinfo($provider->workFile, PATHINFO_FILENAME).'_history.jpg'."\n");
+        fwrite ($fp, '  time: '.time()."\n");
+        fclose ($fp);
+
 
         // save data in session and redirect to index
         \VMFDS\Cutter\Core\Logger::getLogger()->addDebug('Import done, saving to session.');
@@ -154,7 +176,7 @@ class AcquisitionController extends AbstractController
         }
         $fileName = strtr($fileName,
             array(' ' => '_', 'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue',
-            'Ä' => 'Ae', 'Ö' => 'Oe', 'Ü' => 'Ue', 'ß' => 'ss'));
+                'Ä' => 'Ae', 'Ö' => 'Oe', 'Ü' => 'Ue', 'ß' => 'ss'));
         $dest     = CUTTER_uploadPath.$fileName;
         move_uploaded_file($filesArray['file']['tmp_name'], $dest);
 

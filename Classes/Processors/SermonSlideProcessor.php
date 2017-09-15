@@ -63,6 +63,16 @@ class SermonSlideProcessor extends AbstractProcessor
                 'label' => 'Titel für neue Folie'
             ],
             3 => [
+                'key' => 'newSlideText',
+                'form' => '<div id="divNewSlideText" class="form-group"><input type="text" name="newSlideText" id="newSlideText" value="" class="form-control additionalArgument" /></div>',
+                'label' => 'Text für neue Folie'
+            ],
+            4 => [
+                'key' => 'newSlideTextSize',
+                'form' => '<div id="divNewSlideTextSize" class="form-group"><input type="text" name="newSlideTextSize" id="newSlideTextSize" value="'.$this->configuration['default_font_size'].'" class="form-control additionalArgument" /></div>',
+                'label' => 'Schriftgröße für den Text'
+            ],
+            5 => [
                 'key' => 'updateSlideSelectJS',
                 'form' => '<script src="'.CUTTER_baseUrl.'Resources/Public/js/processors/SermonSlideProcessor.js"></script>',
                 'label' => ''
@@ -132,14 +142,15 @@ class SermonSlideProcessor extends AbstractProcessor
                 // create slide?
                 if ($options['slide'] == -1) {
                     $options['newSlideTitle'] = utf8_decode($request->getArgument('newSlideTitle'));
-                    $slideId = $this->createSlide($options['sermon'], $options['newSlideTitle'], $request->getArgument('legal'));
+                    $options['newSlideText'] = utf8_decode($request->getArgument('newSlideText'));
+                    $options['newSlideTextSize'] = utf8_decode($request->getArgument('newSlideTextSize'));
+                    $slideId = $this->createSlide($options['sermon'], $options['newSlideTitle'], $request->getArgument('legal'), $options['newSlideText'], $options['newSlideTextSize']);
                 } else {
                     $slideId = $options['slide'];
                     // delete existing reference(s)
                     $sql = "DELETE FROM sys_file_reference WHERE tablenames='" . $this->getOption('slide_table') . "' AND uid_foreign=$slideId;";
                     $this->sermonDB->query($sql);
                 }
-
                 // move file:
                 $destFile = pathinfo($fileName, PATHINFO_BASENAME);
                 copy($fileName, $this->configuration['move_to'] . $destFile);
@@ -158,17 +169,20 @@ class SermonSlideProcessor extends AbstractProcessor
         }
     }
 
-    protected function createSlide($sermon, $title, $legal)
+    protected function createSlide($sermon, $title, $legal, $text, $textSize)
     {
         $sql = 'SELECT MAX(sorting) idx FROM ' . $this->getOption('slide_table') . ' WHERE sermon_id=' . $sermon . ' AND NOT deleted;';
         $res = $this->sermonDB->getOne($sql);
         $idx = ($res['idx'] ? $res['idx'] + 1 : 0);
 
-        $sql = 'INSERT INTO ' . $this->getOption('slide_table') . ' (sermon_id, sorting, title, '
+        $sql = 'INSERT INTO ' . $this->getOption('slide_table') . ' (sermon_id, sorting, title, presentation_title, presentation_font_size, '
                 . 'image, image_source, pid, tstamp, crdate, cruser_id) VALUES ('
                 . $sermon . ', '
                 . $idx . ', '
-                . "'" . $title . "', 1, "
+                . "'" . $title."', "
+                . "'".$text."', "
+                . $textSize.", "
+                . "1, "
                 . "'" . $legal . "', "
                 . $this->configuration['pid'] . ', '
                 . time() . ', '

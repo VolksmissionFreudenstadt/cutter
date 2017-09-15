@@ -24,21 +24,17 @@
 namespace VMFDS\Cutter\Templates;
 
 /**
- * Description of WebSingleTemplate
+ * Description of NewsletterTitleTemplate
  *
  * @author chris
  */
-class WebSingleTemplate extends AbstractTemplate
+class NewsletterTitleTemplate extends AbstractTemplate
 {
-    protected $category         = 'Veranstaltungen';
-    protected $width            = 1024;
-    protected $height           = 768;
-    protected $processor        = 'Event';
-    protected $suffix           = 'single';
-    protected $title            = 'Einzelansicht';
-    protected $processorOptions = array(
-        'event_field' => 'my_vmfds_events_picture',
-        'event_image_path' => '',
-    );
+    protected $category  = 'Publikationen';
+    protected $height    = 450;
+    protected $width     = 600;
+    protected $processor = 'save';
+    protected $suffix    = 'nltitle';
+    protected $title     = 'Newsletter: Titelbild';
 
 }
